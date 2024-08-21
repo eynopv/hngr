@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel
 
 
@@ -8,14 +9,21 @@ class Recipe(BaseModel):
     instructions: str
 
 
-class Ingredient(BaseModel):
-    id: int
-    name: str
-
-
 class RecipeIngredient(BaseModel):
     id: int
-    recipe_id: int
-    ingredient_id: int
-    quantity_amount: int
-    quantity_unit: str
+    name: str
+    amount: float
+    unit: str
+
+
+class NewRecipeIngredient(BaseModel):
+    name: str
+    amount: float
+    unit: str
+
+
+class NewRecipe(BaseModel):
+    name: str
+    description: str
+    instructions: str
+    ingredients: List[NewRecipeIngredient]
