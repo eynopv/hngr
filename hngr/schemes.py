@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -7,19 +7,20 @@ class Recipe(BaseModel):
     name: str
     description: str
     instructions: str
+    source: str
 
 
 class RecipeIngredient(BaseModel):
     id: int
     name: str
-    amount: float
-    unit: str
+    amount: Optional[float]
+    unit: Optional[str]
 
 
 class NewRecipeIngredient(BaseModel):
     name: str
-    amount: float
-    unit: str
+    amount: Optional[float] = None
+    unit: Optional[str] = None
 
 
 class NewRecipe(BaseModel):
@@ -27,3 +28,4 @@ class NewRecipe(BaseModel):
     description: str
     instructions: str
     ingredients: List[NewRecipeIngredient]
+    source: str

@@ -28,9 +28,9 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
     cursor.execute(
         """
             INSERT INTO
-                recipes (name, description, instructions)
+                recipes (name, description, instructions, source)
             VALUES (
-                :name, :description, :instructions
+                :name, :description, :instructions, :source
             );
             """,
         new_recipe.__dict__,
@@ -75,7 +75,7 @@ def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
     cursor.execute(
         """
             SELECT
-                id, name, description, instructions
+                id, name, description, instructions, source
             FROM
                 recipes
             WHERE
@@ -93,6 +93,7 @@ def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
         name=recipe_data[1],
         description=recipe_data[2],
         instructions=recipe_data[3],
+        source=recipe_data[4],
     )
 
 

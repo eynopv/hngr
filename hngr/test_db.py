@@ -41,7 +41,11 @@ def test_create_recipe():
             name="Test Recipe",
             description="Test Description",
             instructions="Test Instructions",
-            ingredients=[NewRecipeIngredient(name="Test Ingredient", amount=2, unit="Tbsp")],
+            ingredients=[
+                NewRecipeIngredient(name="Test Ingredient", amount=2, unit="Tbsp"),
+                NewRecipeIngredient(name="Nullable"),
+            ],
+            source="sourcepath",
         ),
     )
     assert new_recipe_id
@@ -51,11 +55,16 @@ def test_create_recipe():
     assert recipe.name == "Test Recipe"
     assert recipe.description == "Test Description"
     assert recipe.instructions == "Test Instructions"
+    assert recipe.source == "sourcepath"
 
     ingredients = retrieve_recipe_ingredients(connection, new_recipe_id)
-    assert len(ingredients) == 1
+    assert len(ingredients) == 2
     assert ingredients[0].name == "Test Ingredient"
     assert ingredients[0].amount == 2
     assert ingredients[0].unit == "Tbsp"
+
+    assert ingredients[1].name == "Nullable"
+    assert ingredients[1].amount == None
+    assert ingredients[1].unit == None
 
     connection.close()
