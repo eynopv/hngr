@@ -68,3 +68,7 @@ def test_create_recipe():
     assert ingredients[1].unit == None
 
     connection.close()
+
+
+def test_list_recipes():
+    assert True == False, "Implement the test"

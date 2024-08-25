@@ -67,6 +67,25 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
     return recipe_id
 
 
+def list_recipes(connection: Connection) -> List[Recipe]:
+    if not connection.connection:
+        # TODO: raise error if connection not open
+        return []
+
+    cursor = connection.connection.cursor()
+    cursor.execute("SELECT id, name, description, instructions, source FROM recipes;")
+    data = cursor.fetchall()
+
+    print("The data", data)
+
+    if not data:
+        return []
+
+    return [
+        Recipe(id=d[0], name=d[1], description=d[2], instructions=d[3], source=d[4]) for d in data
+    ]
+
+
 def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
     if not connection.connection:
         return None
