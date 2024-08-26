@@ -1,4 +1,4 @@
-from .schemes import NewRecipeIngredient, Recipe, RecipeIngredient, NewRecipe
+from .schemes import Recipe, NewRecipe
 
 
 def test_recipe():
@@ -6,40 +6,17 @@ def test_recipe():
         id=1,
         name="Recipe name",
         description="Recipe description",
-        instructions="Recipe instructions",
+        directions="Recipe instructions",
+        ingredients="Recipe ingredients",
         source="testsource",
     )
 
 
-def test_ingredient():
-    RecipeIngredient(id=1, name="Ingredient name", amount=2, unit="Tbsp")
-
-
-def test_newrecipeingredient():
-    NewRecipeIngredient(name="Test Ingredient", amount=2, unit="Tbsp")
-
-
-def test_newrecipeingredient_nullablefields():
-    recipe_ingredient = NewRecipeIngredient(name="Test Ingredient")
-    assert recipe_ingredient.amount == None
-    assert recipe_ingredient.unit == None
-
-
-def test_newrecipe_without_ingredient():
+def test_newrecipe():
     NewRecipe(
         name="Test Recipe",
         description="Test description",
-        instructions="Test instructions",
-        ingredients=[],
-        source="testsource",
-    )
-
-
-def test_newrecipe_with_ingredients():
-    NewRecipe(
-        name="Test Recipe",
-        description="Test description",
-        instructions="Test instructions",
-        ingredients=[NewRecipeIngredient(name="Test Ingredient", amount=2, unit="Tbsp")],
+        directions="Test instructions",
+        ingredients="Test ingredients",
         source="testsource",
     )

@@ -1,0 +1,21 @@
+body {
+  background-color: #030303;
+  color: #fefefe;
+}
+
+a {
+  color: #93c5fd;
+}
+
+.container {
+  max-width: 1000px;
+}
+
+.p-2 {
+  padding: 20px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}

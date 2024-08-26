@@ -1,7 +1,12 @@
 import os
 
-from .db import Connection, create_recipe, retrieve_recipe, retrieve_recipe_ingredients
-from .schemes import NewRecipe, NewRecipeIngredient
+from .db import (
+    Connection,
+    create_recipe,
+    list_recipes,
+    retrieve_recipe,
+)
+from .schemes import NewRecipe
 
 
 db_url = os.environ["DATABASE_URL"]
@@ -23,14 +28,6 @@ def test_retrieve_recipe_does_not_exist():
     connection.close()
 
 
-def test_retrieve_recipe_ingredient_does_not_exist():
-    connection = Connection(db_url)
-    connection.open()
-    ingredients = retrieve_recipe_ingredients(connection, 999)
-    assert len(ingredients) == 0
-    connection.close()
-
-
 def test_create_recipe():
     connection = Connection(db_url)
     connection.open()
@@ -40,11 +37,8 @@ def test_create_recipe():
         new_recipe=NewRecipe(
             name="Test Recipe",
             description="Test Description",
-            instructions="Test Instructions",
-            ingredients=[
-                NewRecipeIngredient(name="Test Ingredient", amount=2, unit="Tbsp"),
-                NewRecipeIngredient(name="Nullable"),
-            ],
+            directions="Test Instructions",
+            ingredients="Test ingredients",
             source="sourcepath",
         ),
     )
@@ -54,21 +48,17 @@ def test_create_recipe():
     assert recipe
     assert recipe.name == "Test Recipe"
     assert recipe.description == "Test Description"
-    assert recipe.instructions == "Test Instructions"
+    assert recipe.directions == "Test Instructions"
+    assert recipe.ingredients == "Test ingredients"
     assert recipe.source == "sourcepath"
-
-    ingredients = retrieve_recipe_ingredients(connection, new_recipe_id)
-    assert len(ingredients) == 2
-    assert ingredients[0].name == "Test Ingredient"
-    assert ingredients[0].amount == 2
-    assert ingredients[0].unit == "Tbsp"
-
-    assert ingredients[1].name == "Nullable"
-    assert ingredients[1].amount == None
-    assert ingredients[1].unit == None
 
     connection.close()
 
 
 def test_list_recipes():
-    assert True == False, "Implement the test"
+    connection = Connection(db_url)
+    connection.open()
+
+    recipes = list_recipes(connection)
+    assert recipes
+    connection.close()

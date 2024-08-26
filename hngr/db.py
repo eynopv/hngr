@@ -1,7 +1,7 @@
 import sqlite3
 from typing import List
 
-from .schemes import NewRecipe, Recipe, RecipeIngredient
+from .schemes import NewRecipe, Recipe, RecipeListItem
 
 
 class Connection:
@@ -24,66 +24,35 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
         return None
 
     cursor = connection.connection.cursor()
-    connection.connection.execute("BEGIN TRANSACTION;")
     cursor.execute(
         """
             INSERT INTO
-                recipes (name, description, instructions, source)
+                recipes (name, description, directions, ingredients, source)
             VALUES (
-                :name, :description, :instructions, :source
+                :name, :description, :directions, :ingredients, :source
             );
             """,
         new_recipe.__dict__,
     )
     recipe_id = cursor.lastrowid
 
-    for new_ingredient in new_recipe.ingredients:
-        # TODO: check if alredy have same ingredient
-        cursor.execute(
-            """
-                INSERT INTO
-                    ingredients (name)
-                VALUES (?);
-                """,
-            [new_ingredient.name],
-        )
-        cursor.execute(
-            """
-                INSERT INTO
-                    recipe_ingredient (
-                        recipe_id, ingredient_id, amount, unit
-                    )
-                VALUES (?, ?, ?, ?);
-                """,
-            [
-                recipe_id,
-                cursor.lastrowid,
-                new_ingredient.amount,
-                new_ingredient.unit,
-            ],
-        )
-
     connection.connection.commit()
     return recipe_id
 
 
-def list_recipes(connection: Connection) -> List[Recipe]:
+def list_recipes(connection: Connection) -> List[RecipeListItem]:
     if not connection.connection:
         # TODO: raise error if connection not open
         return []
 
     cursor = connection.connection.cursor()
-    cursor.execute("SELECT id, name, description, instructions, source FROM recipes;")
+    cursor.execute("SELECT id, name FROM recipes ORDER BY name ASC;")
     data = cursor.fetchall()
-
-    print("The data", data)
 
     if not data:
         return []
 
-    return [
-        Recipe(id=d[0], name=d[1], description=d[2], instructions=d[3], source=d[4]) for d in data
-    ]
+    return [RecipeListItem(id=d[0], name=d[1]) for d in data]
 
 
 def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
@@ -94,11 +63,11 @@ def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
     cursor.execute(
         """
             SELECT
-                id, name, description, instructions, source
+                id, name, description, directions, ingredients, source
             FROM
                 recipes
             WHERE
-                id = ?
+                id = ?;
             """,
         [recipe_id],
     )
@@ -111,35 +80,7 @@ def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
         id=recipe_data[0],
         name=recipe_data[1],
         description=recipe_data[2],
-        instructions=recipe_data[3],
-        source=recipe_data[4],
+        directions=recipe_data[3],
+        ingredients=recipe_data[4],
+        source=recipe_data[5],
     )
-
-
-def retrieve_recipe_ingredients(connection: Connection, recipe_id: int) -> List[RecipeIngredient]:
-    if not connection.connection:
-        return []
-
-    cursor = connection.connection.cursor()
-    cursor.execute(
-        """
-            SELECT
-                i.id, i.name, ri.amount, ri.unit
-            FROM
-                ingredients as i
-            LEFT JOIN
-                recipe_ingredient as ri
-            ON
-                i.id == ri.ingredient_id
-            WHERE
-                ri.recipe_id = ?
-            """,
-        [recipe_id],
-    )
-    data = cursor.fetchall()
-
-    ingredients: List[RecipeIngredient] = []
-    for row in data:
-        ingredients.append(RecipeIngredient(id=row[0], name=row[1], amount=row[2], unit=row[3]))
-
-    return ingredients
