@@ -63,7 +63,7 @@ def test_bbcgoodfood():
         directions="Heat 1 tbsp olive oil in a non-stick frying pan then add 1 sliced onion and cook on a medium heat until completely softened, around 15 mins, adding a little splash of water if it starts to stick.\nCrush in 1 garlic clove and cook for 2-3 mins more, then add 1 tbsp butter.\nOnce the butter is foaming a little, add 250g sliced mushrooms and cook for around 5 mins until completely softened.\nSeason everything well, then tip onto a plate.\nTip 1 tbsp plain flour into a bowl with a big pinch of salt and pepper, then toss 500g sliced fillet steak in the seasoned flour.\nAdd the steak pieces to the pan, splashing in a little oil if the pan looks dry, and fry for 3-4 mins, until well coloured.\nTip the onions and mushrooms back into the pan. Whisk 150g crème fraîche, 1 tsp English mustard and 100ml beef stock together, then stir into the pan.\nCook over a medium heat for around 5 mins.\nScatter with some chopped parsley, and serve with pappardelle or rice.",
         ingredients="1 tbsp olive oil\n1 onion, sliced\n1 clove of garlic\n1 tbsp butter\n250g mushrooms, sliced\n1 tbsp plain flour\n500g fillet steak, sliced\n150g crème fraîche\n1 tsp English mustard\n100ml beef stock\n½ small pack of parsley, chopped",
         source=url,
-        image="https://images.immediate.co.uk/production/volatile/sites/30/2024/03/cropped-padded-GF-footer-logo-988784d-e9bbf17.png?quality=90&resize=120,27",
+        image="https://images.immediate.co.uk/production/volatile/sites/30/2020/08/beefstroganoff-d53f55e.jpg?quality=90&resize=440,400",
     )
     assert recipe.name == expected.name
     assert recipe.description == expected.description
