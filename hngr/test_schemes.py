@@ -9,6 +9,7 @@ def test_recipe():
         directions="Recipe instructions",
         ingredients="Recipe ingredients",
         source="testsource",
+        image="test image",
     )
 
 
@@ -19,4 +20,5 @@ def test_newrecipe():
         directions="Test instructions",
         ingredients="Test ingredients",
         source="testsource",
+        image="test image",
     )

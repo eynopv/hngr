@@ -2,6 +2,7 @@ from typing import List
 from bs4 import BeautifulSoup
 import re
 from abc import ABC, abstractmethod
+from urllib.parse import urlparse, urljoin
 
 from .schemes import NewRecipe
 from .loaders import FileLoader, RequestLoader
@@ -40,6 +41,7 @@ class MockParser(Parser):
             directions="First Step\nSecond Step\nThird Step",
             ingredients="Ingredients 2 kg\nIngredient 2\nIngredient\n",
             source="mock",
+            image="",
         )
 
 
@@ -54,6 +56,7 @@ class BbcgoodfoodParser(Parser):
             directions=self._get_directions(soup),
             ingredients=self._get_ingredients(soup),
             source=self.url,
+            image=self._get_image(soup),
         )
 
     def _get_name(self, soup: BeautifulSoup) -> str:
@@ -78,6 +81,15 @@ class BbcgoodfoodParser(Parser):
         lis = element.find_all("li")
         return "\n".join([remove_whitespace(li.text) for li in lis])
 
+    def _get_image(self, soup: BeautifulSoup) -> str:
+        div = soup.find("div", {"class": "post-header__image-container"})
+        if not div:
+            return ""
+        img = div.find("img")
+        if not img:
+            return ""
+        return img.get("src", "")
+
 
 class DelishParser(Parser):
 
@@ -90,6 +102,7 @@ class DelishParser(Parser):
             directions=self._get_directions(soup),
             ingredients=self._get_ingredients(soup),
             source=self.url,
+            image=self._get_image(soup),
         )
 
     def _get_title(self, soup: BeautifulSoup) -> str:
@@ -130,13 +143,17 @@ class DelishParser(Parser):
                 ingredients.append(remove_whitespace(ingredient_element.text))
         return "\n".join(ingredients)
 
+    def _get_image(self, soup: BeautifulSoup) -> str:
+        img = soup.find("img", {"title": "Video player poster image"})
+        if not img:
+            return ""
+        return img.get("src", "")
+
 
 def remove_whitespace(s: str) -> str:
     return re.sub(r"\s+", " ", s.strip())
 
 
-def parse_float(s: str) -> float:
-    if "/" in s:
-        (numerator, denominator) = [int(n.strip()) for n in s.split("/")]
-        return numerator / denominator
-    return float(s)
+def clean_url(s: str) -> str:
+    parsed = urlparse(s)
+    return urljoin(s, parsed.path)

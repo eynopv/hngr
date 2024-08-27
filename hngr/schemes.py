@@ -8,6 +8,7 @@ class Recipe(BaseModel):
     directions: str
     ingredients: str
     source: str
+    image: str
 
 
 class RecipeListItem(BaseModel):
@@ -21,3 +22,4 @@ class NewRecipe(BaseModel):
     directions: str
     ingredients: str
     source: str
+    image: str

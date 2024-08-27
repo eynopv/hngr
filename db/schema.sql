@@ -5,7 +5,8 @@ CREATE TABLE recipes (
     description TEXT NOT NULL,
     directions TEXT NOT NULL,
     ingredients TEXT NOT NULL,
-    source TEXT NOT NULL
+    source TEXT NOT NULL,
+    image TEXT
 );
 -- Dbmate schema migrations
 INSERT INTO "schema_migrations" (version) VALUES

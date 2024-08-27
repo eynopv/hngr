@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-from .parsers import ParserFactory
+from .parsers import ParserFactory, clean_url
 from .db import Connection, list_recipes, create_recipe, retrieve_recipe
 
 app = FastAPI()
@@ -31,7 +31,7 @@ async def index(request: Request):
 @app.post("/scrape")
 async def scrape(link: Annotated[str, Form()]):
     try:
-        parser = ParserFactory.get_parser(link)
+        parser = ParserFactory.get_parser(clean_url(link))
         new_recipe = parser.parse()
         if new_recipe:
             connection = Connection(url=DATABASE_URL)

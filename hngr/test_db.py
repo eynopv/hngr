@@ -40,6 +40,7 @@ def test_create_recipe():
             directions="Test Instructions",
             ingredients="Test ingredients",
             source="sourcepath",
+            image="imagepath",
         ),
     )
     assert new_recipe_id
