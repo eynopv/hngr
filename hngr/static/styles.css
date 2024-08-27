@@ -1,0 +1,80 @@
+:root {
+  --white: #fefefe;
+  --black: #030303;
+  --grey: #1f1f1f;
+}
+
+body {
+  font-size: 18px;
+  background-color: var(--black);
+  color: var(--white);
+}
+
+a {
+  color: #93c5fd;
+}
+
+.container {
+  max-width: 1000px;
+}
+
+.p-2 {
+  padding: 20px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.recipe-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.recipe-content-item-1 {
+  flex-basis: 300px;
+  flex-shrink: 1;
+  flex-grow: 1;
+}
+
+.recipe-content-item-2 {
+  flex-basis: 500px;
+  flex-shrink: 1;
+  flex-grow: 1;
+}
+
+li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 300px 500px;
+  gap: 10px;
+}
+
+.btn {
+  padding: 0.5em 1em;
+  background-color: transparent;
+  color: var(--white);
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--white);
+}
+
+.btn:hover {
+  cursor: pointer;
+  background-color: var(--grey);
+}
+
+.spacer-1 {
+  margin: 10px 0;
+}
+
+input[name="link"] {
+  padding: 0.5em 1em;
+  width: 300px;
+}

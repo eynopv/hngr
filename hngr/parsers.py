@@ -2,14 +2,15 @@ from typing import List
 from bs4 import BeautifulSoup
 import re
 from abc import ABC, abstractmethod
+from urllib.parse import urlparse, urljoin
 
-from .schemes import NewRecipe, NewRecipeIngredient
+from .schemes import NewRecipe
 from .loaders import FileLoader, RequestLoader
 
 
 class Parser(ABC):
 
-    def __init__(self, url, loader):
+    def __init__(self, url: str, loader: type[FileLoader] | type[RequestLoader] = RequestLoader):
         self.url = url
         self.loader = loader
 
@@ -25,7 +26,9 @@ class ParserFactory:
         if source == "mock":
             return MockParser(source, FileLoader)
         if "delish.com" in source:
-            return DelishParser(source, RequestLoader)
+            return DelishParser(source)
+        if "bbcgoodfood.com" in source:
+            return BbcgoodfoodParser(source)
         raise ValueError(f"{source} is not supported")
 
 
@@ -35,17 +38,72 @@ class MockParser(Parser):
         return NewRecipe(
             name="Mock recipe",
             description="Description",
-            instructions="First Step\nSecond Step\nThird Step",
-            ingredients=[
-                NewRecipeIngredient(name="Ingredient with amount and unit", amount=2, unit="kg"),
-                NewRecipeIngredient(name="Ingredient only with amount", amount=2),
-                NewRecipeIngredient(name="Ingredient without amount and unit"),
-            ],
+            directions="First Step\nSecond Step\nThird Step",
+            ingredients="Ingredients 2 kg\nIngredient 2\nIngredient\n",
             source="mock",
+            image="",
         )
 
 
+class BbcgoodfoodParser(Parser):
+
+    def parse(self) -> NewRecipe:
+        data = self.loader.load(self.url)
+        soup = BeautifulSoup(data, "html.parser")
+        return NewRecipe(
+            name=self._get_name(soup),
+            description=self._get_description(soup),
+            directions=self._get_directions(soup),
+            ingredients=self._get_ingredients(soup),
+            source=self.url,
+            image=self._get_image(soup),
+        )
+
+    def _get_name(self, soup: BeautifulSoup) -> str:
+        element = soup.find("h1")
+        return remove_whitespace(element.text) if element else ""
+
+    def _get_description(self, soup: BeautifulSoup) -> str:
+        element = soup.find("div", {"class": "post-header__description"})
+        return remove_whitespace(element.text) if element else ""
+
+    def _get_directions(self, soup: BeautifulSoup) -> str:
+        element = soup.find("section", {"class": "recipe__method-steps"})
+        if not element:
+            return ""
+        ps = element.find_all("p")
+        return "\n".join([remove_whitespace(p.text) for p in ps])
+
+    def _get_ingredients(self, soup: BeautifulSoup) -> str:
+        element = soup.find("section", {"class": "recipe__ingredients"})
+        if not element:
+            return ""
+        lis = element.find_all("li")
+        return "\n".join([remove_whitespace(li.text) for li in lis])
+
+    def _get_image(self, soup: BeautifulSoup) -> str:
+        div = soup.find("div", {"class": "post-header__image-container"})
+        if not div:
+            return ""
+        img = div.find("img")
+        if not img:
+            return ""
+        return img.get("src", "")
+
+
 class DelishParser(Parser):
+
+    def parse(self) -> NewRecipe:
+        data = self.loader.load(self.url)
+        soup = BeautifulSoup(data, "html.parser")
+        return NewRecipe(
+            name=self._get_title(soup),
+            description="",
+            directions=self._get_directions(soup),
+            ingredients=self._get_ingredients(soup),
+            source=self.url,
+            image=self._get_image(soup),
+        )
 
     def _get_title(self, soup: BeautifulSoup) -> str:
         element = soup.find("h1")
@@ -76,49 +134,26 @@ class DelishParser(Parser):
                     directions.append(value)
         return "\n".join(directions)
 
-    def _get_ingredients(self, soup: BeautifulSoup) -> List[NewRecipeIngredient]:
+    def _get_ingredients(self, soup: BeautifulSoup) -> str:
         element = soup.find("div", {"class": "ingredients-body"})
-        ingredients: List[NewRecipeIngredient] = []
+        ingredients: List[str] = []
         if element:
             items = element.find_all("li")
             for ingredient_element in items:
-                amount = (
-                    parse_float(ingredient_element.find("strong").text)
-                    if ingredient_element.find("strong")
-                    else None
-                )
-                unit = (
-                    ingredient_element.find_all("strong")[1].text
-                    if len(ingredient_element.find_all("strong")) > 1
-                    else None
-                )
-                name = ingredient_element.find("p").text if ingredient_element.find("p") else ""
-                ingredients.append(NewRecipeIngredient(name=name, amount=amount, unit=unit))
-        return ingredients
+                ingredients.append(remove_whitespace(ingredient_element.text))
+        return "\n".join(ingredients)
 
-    def parse(self) -> NewRecipe:
-        data = self.loader.load(self.url)
-        soup = BeautifulSoup(data, "html.parser")
-
-        name = self._get_title(soup)
-        directions = self._get_directions(soup)
-        ingredients = self._get_ingredients(soup)
-
-        return NewRecipe(
-            name=name,
-            description="Test",
-            instructions=directions,
-            ingredients=ingredients,
-            source=self.url,
-        )
+    def _get_image(self, soup: BeautifulSoup) -> str:
+        img = soup.find("img", {"title": "Video player poster image"})
+        if not img:
+            return ""
+        return img.get("src", "")
 
 
 def remove_whitespace(s: str) -> str:
     return re.sub(r"\s+", " ", s.strip())
 
 
-def parse_float(s: str) -> float:
-    if "/" in s:
-        (numerator, denominator) = [int(n.strip()) for n in s.split("/")]
-        return numerator / denominator
-    return float(s)
+def clean_url(s: str) -> str:
+    parsed = urlparse(s)
+    return urljoin(s, parsed.path)

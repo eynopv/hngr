@@ -1,0 +1,40 @@
+{% extends "base.html" %} {% block content %}
+<a href="/">Back to main page</a>
+
+<main>
+  <header class="recipe-content">
+    <div class="recipe-content-item-1"></div>
+    <div class="recipe-content-item-2">
+      <h1>{{ recipe.name }}</h1>
+      {% if recipe.description %}
+      <p>{{ recipe.description }}</p>
+      {% endif %} {% if recipe.source %}
+      <p>Originally from: <a href="{{ recipe.source }}">{{ recipe.source }}</a></p>
+      {% endif %}
+      {% if recipe.image %}
+        <img src="{{ recipe.image }}" alt="Preview {{ recipe.name }}" width="100%"/>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="recipe-content">
+    <section class="recipe-content-item-1">
+      <h2>Ingredients</h2>
+      <ul>
+        {% for ingredient in recipe.ingredients.split('\n') %}
+        <li>{{ ingredient }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="recipe-content-item-2">
+      <h2>Directions</h2>
+      <ol>
+        {% for step in recipe.directions.split('\n') %}
+        <li>{{ step }}</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </div>
+</main>
+{% endblock %}

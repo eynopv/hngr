@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block content %}
+
+<h1>Welcome to hngr</h1>
+<form action="/scrape" method="POST">
+  <label for="recipe-link">Paste link to scrape (supported: delish.com,
+    bbcgoodfood.com)</label><br/>
+  <input type="url" name="link" id="recipe-link" required/><br/>
+  <div class="spacer-1"></div>
+  <button type="submit" class="btn">Scrape and save</button>
+</form>
+<section>
+  <h2>Your recipes</h2>
+  {% if recipes %}
+  <ul>
+  {% for recipe in recipes %}
+  <li><a href="/recipe/{{ recipe.id }}">{{ recipe.name }}</a></li>
+  {% endfor %}
+  </ul>
+  {% else %}
+  <p>You don't have any recipes yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
