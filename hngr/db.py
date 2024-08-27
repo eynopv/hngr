@@ -72,7 +72,6 @@ def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
         [recipe_id],
     )
     recipe_data = cursor.fetchone()
-    print(recipe_data)
 
     if not recipe_data:
         return None

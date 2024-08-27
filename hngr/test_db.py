@@ -9,7 +9,7 @@ from .db import (
 from .schemes import NewRecipe
 
 
-db_url = os.environ["DATABASE_URL"]
+db_url = os.environ.get("DB", "")
 
 
 def test_connection():

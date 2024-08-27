@@ -13,5 +13,5 @@ dev:
 
 test:
 	DATABASE_URL="sqlite:$(TEST_DB_FILE)" dbmate up
-	DATABASE_URL=$(TEST_DB_FILE) $(VENV_BIN)/pytest -vv || true
+	DB=$(TEST_DB_FILE) $(VENV_BIN)/pytest -vv || true
 	rm $(TEST_DB_FILE)

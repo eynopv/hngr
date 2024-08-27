@@ -4,9 +4,12 @@ from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
 
 from .parsers import ParserFactory, clean_url
 from .db import Connection, list_recipes, create_recipe, retrieve_recipe
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -14,7 +17,7 @@ app.mount("/static", StaticFiles(directory="hngr/static"), name="static")
 
 templates = Jinja2Templates(directory="hngr/templates")
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "db/local.db")
+DATABASE_URL = os.environ.get("DB", "")
 
 
 @app.get("/", response_class=HTMLResponse)
