@@ -1,5 +1,5 @@
 from typing import List
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import re
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse, urljoin
@@ -69,26 +69,26 @@ class BbcgoodfoodParser(Parser):
 
     def _get_directions(self, soup: BeautifulSoup) -> str:
         element = soup.find("section", {"class": "recipe__method-steps"})
-        if not element:
+        if not element or type(element) != Tag:
             return ""
         ps = element.find_all("p")
         return "\n".join([remove_whitespace(p.text) for p in ps])
 
     def _get_ingredients(self, soup: BeautifulSoup) -> str:
         element = soup.find("section", {"class": "recipe__ingredients"})
-        if not element:
+        if not element or type(element) != Tag:
             return ""
         lis = element.find_all("li")
         return "\n".join([remove_whitespace(li.text) for li in lis])
 
     def _get_image(self, soup: BeautifulSoup) -> str:
         div = soup.find("div", {"class": "post-header__image-container"})
-        if not div:
+        if not div or type(div) != Tag:
             return ""
         img = div.find("img")
-        if not img:
+        if not img or type(img) != Tag:
             return ""
-        return img.get("src", "")
+        return str(img.get("src", ""))
 
 
 class DelishParser(Parser):
@@ -116,7 +116,7 @@ class DelishParser(Parser):
         if not ul:
             return ""
         ol = ul.find("ol")
-        if not ol:
+        if not ol or type(ol) != Tag:
             return ""
 
         directions = []
@@ -137,7 +137,7 @@ class DelishParser(Parser):
     def _get_ingredients(self, soup: BeautifulSoup) -> str:
         element = soup.find("div", {"class": "ingredients-body"})
         ingredients: List[str] = []
-        if element:
+        if element and type(element) == Tag:
             items = element.find_all("li")
             for ingredient_element in items:
                 ingredients.append(remove_whitespace(ingredient_element.text))
@@ -145,9 +145,9 @@ class DelishParser(Parser):
 
     def _get_image(self, soup: BeautifulSoup) -> str:
         img = soup.find("img", {"title": "Video player poster image"})
-        if not img:
+        if not img or type(img) != Tag:
             return ""
-        return img.get("src", "")
+        return str(img.get("src", ""))
 
 
 def remove_whitespace(s: str) -> str:
