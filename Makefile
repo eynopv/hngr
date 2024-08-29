@@ -3,6 +3,7 @@ TEST_DB_FILE=db/test.db
 
 .PHONY: venv
 .PHONY: dev
+.PHONY: start
 .PHONY: test
 
 venv:
@@ -10,6 +11,9 @@ venv:
 
 dev:
 	DEV=true $(VENV_BIN)/fastapi dev hngr/main.py
+
+start:
+	$(VENV_BIN)/fastapi run hngr/main.py
 
 test:
 	DATABASE_URL="sqlite:$(TEST_DB_FILE)" dbmate up
