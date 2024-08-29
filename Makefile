@@ -9,7 +9,7 @@ venv:
 	python -m venv .venv
 
 dev:
-	$(VENV_BIN)/fastapi dev hngr/main.py
+	DEV=true $(VENV_BIN)/fastapi dev hngr/main.py
 
 test:
 	DATABASE_URL="sqlite:$(TEST_DB_FILE)" dbmate up

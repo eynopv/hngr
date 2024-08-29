@@ -1,4 +1,5 @@
 import sqlite3
+import logging
 from typing import List
 
 from .schemes import NewRecipe, Recipe, RecipeListItem
@@ -11,17 +12,20 @@ class Connection:
         self.connection = None
 
     def open(self):
+        logging.debug(f"connecting to {self.url}")
         self.connection = sqlite3.connect(self.url)
 
     def close(self):
+        logging.debug(f"closing connection to {self.url}")
         if self.connection:
             self.connection.close()
             self.connection = None
 
 
 def create_recipe(connection: Connection, new_recipe: NewRecipe):
+    logging.debug("about to create new recipe")
     if not connection.connection:
-        return None
+        raise Exception("database connection is not open")
 
     cursor = connection.connection.cursor()
     cursor.execute(
@@ -41,9 +45,9 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
 
 
 def list_recipes(connection: Connection) -> List[RecipeListItem]:
+    logging.debug(f"about to list recipes")
     if not connection.connection:
-        # TODO: raise error if connection not open
-        return []
+        raise Exception("database connection is not open")
 
     cursor = connection.connection.cursor()
     cursor.execute("SELECT id, name FROM recipes ORDER BY name ASC;")
@@ -56,8 +60,9 @@ def list_recipes(connection: Connection) -> List[RecipeListItem]:
 
 
 def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
+    logging.debug(f"about to retrieve recipe {recipe_id}")
     if not connection.connection:
-        return None
+        raise Exception("database connection is not open")
 
     cursor = connection.connection.cursor()
     cursor.execute(

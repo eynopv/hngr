@@ -1,4 +1,5 @@
 import os
+import pytest
 
 from .db import (
     Connection,
@@ -26,6 +27,12 @@ def test_retrieve_recipe_does_not_exist():
     recipe = retrieve_recipe(connection, 999)
     assert not recipe
     connection.close()
+
+
+def test_retrieve_recipe_raises_exception_when_connection_not_open():
+    connection = Connection(db_url)
+    with pytest.raises(Exception, match="connection is not open"):
+        retrieve_recipe(connection, 999)
 
 
 def test_create_recipe():
@@ -56,6 +63,12 @@ def test_create_recipe():
     connection.close()
 
 
+def test_create_recipe_raises_exception_when_connection_not_open():
+    connection = Connection(db_url)
+    with pytest.raises(Exception, match="connection is not open"):
+        retrieve_recipe(connection, 999)
+
+
 def test_list_recipes():
     connection = Connection(db_url)
     connection.open()
@@ -63,3 +76,9 @@ def test_list_recipes():
     recipes = list_recipes(connection)
     assert recipes
     connection.close()
+
+
+def test_list_recipes_raises_exception_when_connection_not_open():
+    connection = Connection(db_url)
+    with pytest.raises(Exception, match="connection is not open"):
+        list_recipes(connection)
