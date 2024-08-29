@@ -63,6 +63,37 @@ def test_create_recipe():
     connection.close()
 
 
+def test_create_recipe_throws_on_existing_source():
+    connection = Connection(db_url)
+    connection.open()
+    create_recipe(
+        connection,
+        NewRecipe(
+            name="Should be allowed",
+            description="",
+            directions="",
+            ingredients="",
+            source="throwsonexistingsource",
+            image="",
+        ),
+    )
+
+    with pytest.raises(
+        ValueError, match="recipe with source throwsonexistingsource already exists"
+    ):
+        create_recipe(
+            connection,
+            NewRecipe(
+                name="Should NOT be allowed",
+                description="",
+                directions="",
+                ingredients="",
+                source="throwsonexistingsource",
+                image="",
+            ),
+        )
+
+
 def test_create_recipe_raises_exception_when_connection_not_open():
     connection = Connection(db_url)
     with pytest.raises(Exception, match="connection is not open"):

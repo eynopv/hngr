@@ -28,6 +28,12 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
         raise Exception("database connection is not open")
 
     cursor = connection.connection.cursor()
+
+    cursor.execute("SELECT id FROM recipes WHERE source = ?", [new_recipe.source])
+    recipe = cursor.fetchone()
+    if recipe:
+        raise ValueError(f"recipe with source {new_recipe.source} already exists")
+
     cursor.execute(
         """
             INSERT INTO
