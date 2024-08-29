@@ -12,18 +12,18 @@ class Connection:
         self.connection = None
 
     def open(self):
-        logging.debug(f"connecting to {self.url}")
+        logging.info(f"connecting to {self.url}")
         self.connection = sqlite3.connect(self.url)
 
     def close(self):
-        logging.debug(f"closing connection to {self.url}")
+        logging.info(f"closing connection to {self.url}")
         if self.connection:
             self.connection.close()
             self.connection = None
 
 
 def create_recipe(connection: Connection, new_recipe: NewRecipe):
-    logging.debug("about to create new recipe")
+    logging.info("about to create new recipe")
     if not connection.connection:
         raise Exception("database connection is not open")
 
@@ -51,7 +51,7 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
 
 
 def list_recipes(connection: Connection) -> List[RecipeListItem]:
-    logging.debug(f"about to list recipes")
+    logging.info(f"about to list recipes")
     if not connection.connection:
         raise Exception("database connection is not open")
 
@@ -66,7 +66,7 @@ def list_recipes(connection: Connection) -> List[RecipeListItem]:
 
 
 def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
-    logging.debug(f"about to retrieve recipe {recipe_id}")
+    logging.info(f"about to retrieve recipe {recipe_id}")
     if not connection.connection:
         raise Exception("database connection is not open")
 

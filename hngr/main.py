@@ -14,7 +14,7 @@ from .db import Connection, list_recipes, create_recipe, retrieve_recipe
 load_dotenv()
 
 if os.environ.get("DEV", False):
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
