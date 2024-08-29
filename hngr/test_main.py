@@ -25,3 +25,13 @@ def test_scrape_invalidsource():
 def test_recipe_loads():
     response = client.get("/recipe/1")
     assert response.status_code == 200
+
+
+def test_recipe_delete_non_existant():
+    response = client.delete("/recipe/999")
+    assert response.status_code == 404
+
+
+def test_recipe_delete():
+    response = client.delete("/recipe/1")
+    assert response.status_code == 204

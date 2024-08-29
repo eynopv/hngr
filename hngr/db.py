@@ -3,6 +3,7 @@ import logging
 from typing import List
 
 from .schemes import NewRecipe, Recipe, RecipeListItem
+from .exceptions import DatabaseConnectionClosed
 
 
 class Connection:
@@ -25,7 +26,7 @@ class Connection:
 def create_recipe(connection: Connection, new_recipe: NewRecipe):
     logging.info("about to create new recipe")
     if not connection.connection:
-        raise Exception("database connection is not open")
+        raise DatabaseConnectionClosed()
 
     cursor = connection.connection.cursor()
 
@@ -53,7 +54,7 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
 def list_recipes(connection: Connection) -> List[RecipeListItem]:
     logging.info(f"about to list recipes")
     if not connection.connection:
-        raise Exception("database connection is not open")
+        raise DatabaseConnectionClosed()
 
     cursor = connection.connection.cursor()
     cursor.execute("SELECT id, name FROM recipes ORDER BY name ASC;")
@@ -68,7 +69,7 @@ def list_recipes(connection: Connection) -> List[RecipeListItem]:
 def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
     logging.info(f"about to retrieve recipe {recipe_id}")
     if not connection.connection:
-        raise Exception("database connection is not open")
+        raise DatabaseConnectionClosed()
 
     cursor = connection.connection.cursor()
     cursor.execute(
@@ -96,3 +97,21 @@ def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
         source=recipe_data[5],
         image=recipe_data[6],
     )
+
+
+def delete_recipe(connection: Connection, recipe_id: int) -> int:
+    logging.info(f"about to delete recipe {recipe_id}")
+    if not connection.connection:
+        raise DatabaseConnectionClosed()
+    cursor = connection.connection.cursor()
+    cursor.execute(
+        """
+        DELETE FROM
+            recipes
+        WHERE
+            id = ?
+        """,
+        [recipe_id],
+    )
+    connection.connection.commit()
+    return cursor.rowcount

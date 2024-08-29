@@ -1,13 +1,9 @@
 import os
 import pytest
 
-from .db import (
-    Connection,
-    create_recipe,
-    list_recipes,
-    retrieve_recipe,
-)
+from .db import Connection, create_recipe, list_recipes, retrieve_recipe, delete_recipe
 from .schemes import NewRecipe
+from .exceptions import DatabaseConnectionClosed
 
 
 db_url = os.environ.get("DB", "")
@@ -31,7 +27,7 @@ def test_retrieve_recipe_does_not_exist():
 
 def test_retrieve_recipe_raises_exception_when_connection_not_open():
     connection = Connection(db_url)
-    with pytest.raises(Exception, match="connection is not open"):
+    with pytest.raises(DatabaseConnectionClosed):
         retrieve_recipe(connection, 999)
 
 
@@ -96,7 +92,7 @@ def test_create_recipe_throws_on_existing_source():
 
 def test_create_recipe_raises_exception_when_connection_not_open():
     connection = Connection(db_url)
-    with pytest.raises(Exception, match="connection is not open"):
+    with pytest.raises(DatabaseConnectionClosed):
         retrieve_recipe(connection, 999)
 
 
@@ -111,5 +107,27 @@ def test_list_recipes():
 
 def test_list_recipes_raises_exception_when_connection_not_open():
     connection = Connection(db_url)
-    with pytest.raises(Exception, match="connection is not open"):
+    with pytest.raises(DatabaseConnectionClosed):
         list_recipes(connection)
+
+
+def test_delete_recipe_raises_exception_when_connection_not_open():
+    connection = Connection(db_url)
+    with pytest.raises(DatabaseConnectionClosed):
+        delete_recipe(connection, 999)
+
+
+def test_delete_recipe_success():
+    connection = Connection(db_url)
+    connection.open()
+    is_deleted = delete_recipe(connection, 2)
+    connection.close()
+    assert is_deleted == True
+
+
+def test_delete_recipe_failure():
+    connection = Connection(db_url)
+    connection.open()
+    is_deleted = delete_recipe(connection, 999)
+    connection.close()
+    assert is_deleted == False

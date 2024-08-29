@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 from .parsers import ParserFactory, clean_url
-from .db import Connection, list_recipes, create_recipe, retrieve_recipe
+from .db import Connection, list_recipes, create_recipe, retrieve_recipe, delete_recipe
 
 
 load_dotenv()
@@ -72,6 +72,24 @@ async def recipe(request: Request, recipe_id: int):
         return templates.TemplateResponse(
             request=request, name="recipe.html", context={"recipe": recipe}
         )
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        connection.close()
+
+
+@app.delete("/recipe/{recipe_id}", status_code=204)
+async def recipe_delete(recipe_id: int):
+    connection = Connection(url=DATABASE_URL)
+    try:
+        connection.open()
+        is_deleted = delete_recipe(connection, recipe_id)
+        if not is_deleted:
+            raise HTTPException(status_code=404, detail=f"recipe {recipe_id} not found")
+        return
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail=str(e))
