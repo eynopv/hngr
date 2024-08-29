@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/eynopv/lac/master/docs/json-schemas/request.schema.json",
+  "path": "http://127.0.0.1:8000/scrape",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  "body": "link=${link}",
+  "variables": {
+    "link": "mock"
+  }
+}
