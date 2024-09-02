@@ -1,16 +1,23 @@
 from typing import List
 from bs4 import BeautifulSoup, Tag
 import re
+import json
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse, urljoin
 
+from hngr.exceptions import ParserException
+
 from .schemes import NewRecipe
-from .loaders import FileLoader, RequestLoader
+from .loaders import FileLoader, RequestLoader, TextLoader
 
 
 class Parser(ABC):
 
-    def __init__(self, url: str, loader: type[FileLoader] | type[RequestLoader] = RequestLoader):
+    def __init__(
+        self,
+        url: str,
+        loader: type[FileLoader] | type[RequestLoader] | type[TextLoader] = RequestLoader,
+    ):
         self.url = url
         self.loader = loader
 
@@ -29,6 +36,8 @@ class ParserFactory:
             return DelishParser(source)
         if "bbcgoodfood.com" in source:
             return BbcgoodfoodParser(source)
+        if "k-ruoka.fi" in source:
+            return KruokaParser(source)
         raise ValueError(f"{source} is not supported")
 
 
@@ -61,33 +70,42 @@ class BbcgoodfoodParser(Parser):
 
     def _get_name(self, soup: BeautifulSoup) -> str:
         element = soup.find("h1")
+        if not element:
+            raise ParserException("'h1' element not found")
         return remove_whitespace(element.text) if element else ""
 
     def _get_description(self, soup: BeautifulSoup) -> str:
         element = soup.find("div", {"class": "post-header__description"})
+        if not element:
+            raise ParserException("'div.post-header__description' element not found")
         return remove_whitespace(element.text) if element else ""
 
     def _get_directions(self, soup: BeautifulSoup) -> str:
         element = soup.find("section", {"class": "recipe__method-steps"})
         if not element or type(element) != Tag:
-            return ""
+            raise ParserException("'section.recipe__method-steps' element not found")
         ps = element.find_all("p")
+        if not ps:
+            raise ParserException("'p' element not found")
         return "\n".join([remove_whitespace(p.text) for p in ps])
 
     def _get_ingredients(self, soup: BeautifulSoup) -> str:
         element = soup.find("section", {"class": "recipe__ingredients"})
         if not element or type(element) != Tag:
-            return ""
+            raise ParserException("'section.recipe__ingredients' element not found")
         lis = element.find_all("li")
+        if not lis:
+            raise ParserException("'li' element not found")
         return "\n".join([remove_whitespace(li.text) for li in lis])
 
     def _get_image(self, soup: BeautifulSoup) -> str:
         div = soup.find("div", {"class": "post-header__image-container"})
         if not div or type(div) != Tag:
-            return ""
+            raise ParserException("'div.post-header__image-container' element not found")
         img = div.find("img")
+
         if not img or type(img) != Tag:
-            return ""
+            raise ParserException("'img' element not found")
         return str(img.get("src", ""))
 
 
@@ -107,17 +125,20 @@ class DelishParser(Parser):
 
     def _get_title(self, soup: BeautifulSoup) -> str:
         element = soup.find("h1")
-        if element:
-            return remove_whitespace(element.text)
-        return ""
+
+        if not element:
+            raise ParserException("'h1' element not found")
+
+        return remove_whitespace(element.text)
 
     def _get_directions(self, soup: BeautifulSoup) -> str:
         ul = soup.find("ul", {"class": "directions"})
         if not ul:
-            return ""
+            raise ParserException("'ul' element not found")
+
         ol = ul.find("ol")
         if not ol or type(ol) != Tag:
-            return ""
+            raise ParserException("'ol' element not found")
 
         directions = []
 
@@ -132,22 +153,52 @@ class DelishParser(Parser):
                 value = remove_whitespace(direction.text)
                 if value:
                     directions.append(value)
+
+        if not directions:
+            raise ParserException("unable to parse 'directions'")
+
         return "\n".join(directions)
 
     def _get_ingredients(self, soup: BeautifulSoup) -> str:
         element = soup.find("div", {"class": "ingredients-body"})
+        if not element or type(element) != Tag:
+            raise ParserException("'div.ingredients-body' element not found")
+
         ingredients: List[str] = []
-        if element and type(element) == Tag:
-            items = element.find_all("li")
-            for ingredient_element in items:
-                ingredients.append(remove_whitespace(ingredient_element.text))
+        items = element.find_all("li")
+        for ingredient_element in items:
+            ingredients.append(remove_whitespace(ingredient_element.text))
+
+        if not ingredients:
+            raise ParserException("unable to parse 'ingredients'")
+
         return "\n".join(ingredients)
 
     def _get_image(self, soup: BeautifulSoup) -> str:
         img = soup.find("img", {"title": "Video player poster image"})
         if not img or type(img) != Tag:
-            return ""
+            raise ParserException("'img[title=\"Video player poster image\"]' element not found")
         return str(img.get("src", ""))
+
+
+class KruokaParser(Parser):
+
+    def parse(self):
+        data = self.loader.load(self.url)
+        soup = BeautifulSoup(data, "html.parser")
+        json_data = soup.find("script", {"id": "recipe-json-ld"})
+        if not json_data:
+            raise ParserException("'script#id=\"recipe-json-ld\"' element not found")
+
+        parsed_data = json.loads(json_data.text)
+        return NewRecipe(
+            name=parsed_data["name"],
+            description=parsed_data["description"],
+            directions="\n".join([i["text"] for i in parsed_data["recipeInstructions"]]),
+            ingredients="\n".join(parsed_data["recipeIngredient"]),
+            source=self.url,
+            image=parsed_data["image"][0],
+        )
 
 
 def remove_whitespace(s: str) -> str:

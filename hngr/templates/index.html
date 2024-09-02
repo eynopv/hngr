@@ -1,13 +1,14 @@
 {% extends "base.html" %} {% block content %}
 
 <h1>Welcome to hngr</h1>
-<form action="/scrape" method="POST">
+<form hx-post="/scrape" hx-target="#result" hx-on="htmx:responseError:swapError">
   <label for="recipe-link">Paste link to scrape (supported: delish.com,
     bbcgoodfood.com)</label><br/>
   <input type="url" name="link" id="recipe-link" required/><br/>
   <div class="spacer-1"></div>
   <button type="submit" class="btn">Scrape and save</button>
 </form>
+<div id="result" role="alert"></div>
 <section>
   <h2>Your recipes</h2>
   {% if recipes %}

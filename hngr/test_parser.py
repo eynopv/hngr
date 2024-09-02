@@ -1,6 +1,9 @@
 import pytest
 
+from hngr.exceptions import ParserException
+
 from .parsers import (
+    KruokaParser,
     ParserFactory,
     BbcgoodfoodParser,
     MockParser,
@@ -8,7 +11,7 @@ from .parsers import (
     remove_whitespace,
     clean_url,
 )
-from .loaders import FileLoader
+from .loaders import FileLoader, TextLoader
 from .schemes import NewRecipe
 
 
@@ -25,6 +28,11 @@ def test_factory_delish():
 def test_factory_bbcgoodfood():
     parser = ParserFactory.get_parser("https://www.bbcgoodfood.com/recipes/something")
     assert type(parser) == BbcgoodfoodParser
+
+
+def test_factory_kruoka():
+    parser = ParserFactory.get_parser("https://www.k-ruoka.fi/reseptit/something")
+    assert type(parser) == KruokaParser
 
 
 def test_factory_invalidsource():
@@ -53,6 +61,12 @@ def test_delish():
     assert recipe == expected
 
 
+def test_delish_throws_when_unable_to_parse():
+    parser = DelishParser(url="text loader content", loader=TextLoader)
+    with pytest.raises(ParserException):
+        parser.parse()
+
+
 def test_bbcgoodfood():
     url = "./mocks/bbcgoodfood.html"
     parser = BbcgoodfoodParser(url=url, loader=FileLoader)
@@ -72,6 +86,39 @@ def test_bbcgoodfood():
     assert recipe.source == expected.source
     assert recipe.image == expected.image
     assert recipe == expected
+
+
+def test_bbcgoodfood_throws_when_unable_to_parse():
+    parser = BbcgoodfoodParser(url="text loader content", loader=TextLoader)
+    with pytest.raises(ParserException):
+        parser.parse()
+
+
+def test_kruoka():
+    url = "./mocks/kruoka.html"
+    parser = KruokaParser(url=url, loader=FileLoader)
+    recipe = parser.parse()
+    expected = NewRecipe(
+        name="Helppo kalakeitto",
+        description="Helppo kalakeitto on maistuvaa arkiruokaa ja syntyy käden käänteessä.",
+        directions="Irrota kirjolohifileestä nahka ja suikaloi kirjolohi.\nKiehauta vesi kattilassa. Lisää joukkoon liemikuutio ja kasvissuikaleet. Keitä noin 3 minuuttia.\nNostele kirjolohisuikaleet keittoon ja keitä pari minuuttia, kunnes kala on läpikuultamatonta.\nPuolita oliivit ja hienonna tilli. Lisää oliivit, tilli ja sitruunanmehu keittoon. Tarkista maku ja lisää suolaa tarvittaessa.",
+        ingredients="1 dl Pirkka sitruunatäytteisiä oliiveja\n8 dl vettä\n1 kalaliemikuutio\n2 ps (à 250 g) Pirkka kasvissuikaleita (pakaste)\n300 g kirjolohifileetä\n1/2 dl tilliä\n1 rkl sitruunanmehua\nripaus suolaa",
+        source=url,
+        image="https://public.keskofiles.com/f/recipe/pv008zzo?w=1440&fit=crop&q=60&auto=format&fm=jpg&ar=16%3A7",
+    )
+    assert recipe.name == expected.name
+    assert recipe.description == expected.description
+    assert recipe.directions == expected.directions
+    assert recipe.ingredients == expected.ingredients
+    assert recipe.source == expected.source
+    assert recipe.image == expected.image
+    assert recipe == expected
+
+
+def test_kruoka_throws_when_unable_to_parse():
+    parser = KruokaParser(url="text loader content", loader=TextLoader)
+    with pytest.raises(ParserException):
+        parser.parse()
 
 
 def test_remove_whitespace():

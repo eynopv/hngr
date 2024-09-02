@@ -18,6 +18,13 @@ class FileLoader(Loader):
             return reader.read()
 
 
+class TextLoader(Loader):
+
+    @staticmethod
+    def load(source: str) -> str:
+        return source
+
+
 class RequestLoader(Loader):
 
     @staticmethod

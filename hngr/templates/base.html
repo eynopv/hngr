@@ -4,12 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>hngr - recipe manager</title>
-    <link rel="stylesheet" href="/static/styles.css">
     <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/script.js" defer></script>
   </head>
   <body>
-    <div class="container p-2 mx-auto">
-    {% block content %}{% endblock %}
-    </div>
+    <div class="container p-2 mx-auto">{% block content %}{% endblock %}</div>
   </body>
 </html>

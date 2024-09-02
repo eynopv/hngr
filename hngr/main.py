@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from .parsers import ParserFactory, clean_url
 from .db import Connection, list_recipes, create_recipe, retrieve_recipe, delete_recipe
+from .exceptions import ParserException
 
 
 load_dotenv()
@@ -41,7 +42,7 @@ async def index(request: Request):
         connection.close()
 
 
-@app.post("/scrape", response_class=RedirectResponse)
+@app.post("/scrape")
 async def scrape(link: Annotated[str, Form()]):
     connection = Connection(url=DATABASE_URL)
     try:
@@ -53,10 +54,14 @@ async def scrape(link: Annotated[str, Form()]):
             return RedirectResponse(url=f"/recipe/{recipe_id}", status_code=303)
         raise Exception("something went wrong")
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return HTMLResponse(content=f"<div class='error'>{str(e)}</div>", status_code=400)
+    except ParserException as e:
+        return HTMLResponse(content=f"<div class='error'>{str(e)}</div>", status_code=400)
     except Exception as e:
         logging.error(e)
-        raise HTTPException(status_code=500, detail=str(e))
+        return HTMLResponse(
+            content=f"<div class='error'>Internal server error: {str(e)}</div>", status_code=500
+        )
     finally:
         connection.close()
 
