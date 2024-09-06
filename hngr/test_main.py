@@ -19,7 +19,7 @@ def test_scrape():
 def test_scrape_invalidsource():
     response = client.post("/scrape", data={"link": "invalidsource.com"})
     assert response.status_code == 400
-    assert response.json() == {"detail": "invalidsource.com is not supported"}
+    assert "text/html" in response.headers.get("content-type")
 
 
 def test_recipe_loads():
