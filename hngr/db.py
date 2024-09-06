@@ -115,3 +115,26 @@ def delete_recipe(connection: Connection, recipe_id: int) -> int:
     )
     connection.connection.commit()
     return cursor.rowcount
+
+
+def search_recipes(connection: Connection, term: str) -> List[RecipeListItem]:
+    logging.info(f"looking for recipes with term: {term}")
+    if not connection.connection:
+        raise DatabaseConnectionClosed()
+    cursor = connection.connection.cursor()
+    cursor.execute(
+        """
+                   SELECT
+                       id, name
+                   FROM
+                       recipes
+                   WHERE
+                       name
+                   LIKE ?
+                   """,
+        [f"%{term}%"],
+    )
+    data = cursor.fetchall()
+    if not data:
+        return []
+    return [RecipeListItem(id=d[0], name=d[1]) for d in data]

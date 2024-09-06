@@ -1,7 +1,14 @@
 import os
 import pytest
 
-from .db import Connection, create_recipe, list_recipes, retrieve_recipe, delete_recipe
+from .db import (
+    Connection,
+    create_recipe,
+    list_recipes,
+    retrieve_recipe,
+    delete_recipe,
+    search_recipes,
+)
 from .schemes import NewRecipe
 from .exceptions import DatabaseConnectionClosed
 
@@ -131,3 +138,42 @@ def test_delete_recipe_failure():
     is_deleted = delete_recipe(connection, 999)
     connection.close()
     assert is_deleted == False
+
+
+def test_search_recipe_uppercase():
+    connection = Connection(db_url)
+    connection.open()
+    items = search_recipes(connection, "Test")
+    connection.close()
+    assert len(items) == 1
+    assert items[0].name == "Test Recipe"
+
+
+def test_search_recipe_lowercase():
+    connection = Connection(db_url)
+    connection.open()
+    items = search_recipes(connection, "test")
+    connection.close()
+    assert len(items) == 1
+    assert len(items) == 1
+    assert items[0].name == "Test Recipe"
+
+
+def test_search_recipe_end():
+    connection = Connection(db_url)
+    connection.open()
+    items = search_recipes(connection, "rec")
+    connection.close()
+    assert len(items) == 1
+    assert len(items) == 1
+    assert items[0].name == "Test Recipe"
+
+
+def test_search_recipe_multiple_terms():
+    connection = Connection(db_url)
+    connection.open()
+    items = search_recipes(connection, "test re")
+    connection.close()
+    assert len(items) == 1
+    assert len(items) == 1
+    assert items[0].name == "Test Recipe"

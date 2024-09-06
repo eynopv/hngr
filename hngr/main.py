@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -8,7 +8,14 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 from .parsers import ParserFactory, clean_url
-from .db import Connection, list_recipes, create_recipe, retrieve_recipe, delete_recipe
+from .db import (
+    Connection,
+    list_recipes,
+    create_recipe,
+    retrieve_recipe,
+    delete_recipe,
+    search_recipes,
+)
 from .exceptions import ParserException
 
 
@@ -98,5 +105,23 @@ async def recipe_delete(recipe_id: int):
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        connection.close()
+
+
+@app.post("/search", status_code=200, response_class=HTMLResponse)
+async def search(request: Request, term: Annotated[Optional[str], Form()] = None):
+    connection = Connection(url=DATABASE_URL)
+    try:
+        connection.open()
+        if term:
+            recipes = search_recipes(connection, term)
+        else:
+            recipes = list_recipes(connection)
+        return templates.TemplateResponse(
+            request=request,
+            name="partials/recipes_list.html",
+            context={"recipes": recipes, "search": True},
+        )
     finally:
         connection.close()

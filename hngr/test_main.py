@@ -35,3 +35,9 @@ def test_recipe_delete_non_existant():
 def test_recipe_delete():
     response = client.delete("/recipe/1")
     assert response.status_code == 204
+
+
+def test_search():
+    response = client.post("/search", data={"term": "test"})
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type")

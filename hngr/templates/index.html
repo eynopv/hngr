@@ -11,14 +11,10 @@
 <div id="result" role="alert"></div>
 <section>
   <h2>Your recipes</h2>
-  {% if recipes %}
-  <ul>
-  {% for recipe in recipes %}
-  <li><a href="/recipe/{{ recipe.id }}">{{ recipe.name }}</a></li>
-  {% endfor %}
-  </ul>
-  {% else %}
-  <p>You don't have any recipes yet.</p>
-  {% endif %}
+
+  <input type="text" name="term" hx-post="/search" hx-trigger="keyup changed delay:300ms" hx-target="#recipes"
+  placeholder="Search recipes" />
+
+  {% include "partials/recipes_list.html" %}
 </section>
 {% endblock %}
