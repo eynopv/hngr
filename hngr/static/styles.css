@@ -74,7 +74,10 @@ li {
   margin: 10px 0;
 }
 
-input[name="link"] {
+input[name="link"],
+input[name="term"] {
+  box-sizing: border-box;
   padding: 0.5em 1em;
-  width: 300px;
+  width: 100%;
+  max-width: 350px;
 }

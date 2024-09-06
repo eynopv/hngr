@@ -4,17 +4,15 @@
 <form hx-post="/scrape" hx-target="#result" hx-on="htmx:responseError:swapError">
   <label for="recipe-link">Paste link to scrape (supported: delish.com,
     bbcgoodfood.com)</label><br/>
-  <input type="url" name="link" id="recipe-link" required/><br/>
+  <input type="url" name="link" id="recipe-link" required placeholder="Recipe url"/><br/>
   <div class="spacer-1"></div>
   <button type="submit" class="btn">Scrape and save</button>
 </form>
 <div id="result" role="alert"></div>
 <section>
   <h2>Your recipes</h2>
-
   <input type="text" name="term" hx-post="/search" hx-trigger="keyup changed delay:300ms" hx-target="#recipes"
   placeholder="Search recipes" />
-
   {% include "partials/recipes_list.html" %}
 </section>
 {% endblock %}
