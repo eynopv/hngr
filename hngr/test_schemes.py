@@ -22,3 +22,42 @@ def test_newrecipe():
         source="testsource",
         image="test image",
     )
+
+
+def test_recipe_no_source_label():
+    recipe = Recipe(
+        id=1,
+        name="",
+        description="",
+        directions="",
+        ingredients="",
+        source="",
+        image="test image",
+    )
+    assert recipe.source_label == None
+
+
+def test_recipe_delish_source_label():
+    recipe = Recipe(
+        id=1,
+        name="",
+        description="",
+        directions="",
+        ingredients="",
+        source="https://delish.com/something",
+        image="test image",
+    )
+    assert recipe.source_label == "delish.com"
+
+
+def test_recipe_goodfood_source_label():
+    recipe = Recipe(
+        id=1,
+        name="",
+        description="",
+        directions="",
+        ingredients="",
+        source="https://www.bbcgoodfood.com/recipes/something",
+        image="test image",
+    )
+    assert recipe.source_label == "bbcgoodfood.com"

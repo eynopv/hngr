@@ -9,7 +9,7 @@
       {% if recipe.description %}
       <p>{{ recipe.description }}</p>
       {% endif %} {% if recipe.source %}
-      <p>Originally from: <a href="{{ recipe.source }}">{{ recipe.source }}</a></p>
+      <p>Originally from: <a href="{{ recipe.source }}">{{ recipe.source_label }}</a></p>
       {% endif %}
       {% if recipe.image %}
         <img src="{{ recipe.image }}" alt="Preview {{ recipe.name }}" width="100%"/>
