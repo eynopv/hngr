@@ -1,7 +1,7 @@
 import os
 import logging
 from typing import Annotated, Optional
-from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi import FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -50,7 +50,8 @@ async def index(request: Request):
 
 
 @app.post("/scrape")
-async def scrape(link: Annotated[str, Form()]):
+# keep it synchonous because of playwright, ie BrowserLoader
+def scrape(request: Request, response: Response, link: Annotated[str, Form()]):
     connection = Connection(url=DATABASE_URL)
     try:
         parser = ParserFactory.get_parser(clean_url(link))
@@ -58,7 +59,12 @@ async def scrape(link: Annotated[str, Form()]):
         if new_recipe:
             connection.open()
             recipe_id = create_recipe(connection, new_recipe)
-            return RedirectResponse(url=f"/recipe/{recipe_id}", status_code=303)
+            recipe_url = f"/recipe/{recipe_id}"
+            if "hx-request" in request.headers:
+                response.headers["HX-Redirect"] = recipe_url
+                response.status_code = 303
+                return response
+            return RedirectResponse(url=recipe_url, status_code=303)
         raise Exception("something went wrong")
     except ValueError as e:
         return HTMLResponse(content=f"<div class='error'>{str(e)}</div>", status_code=400)

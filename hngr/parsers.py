@@ -5,10 +5,9 @@ import json
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse, urljoin
 
-from hngr.exceptions import ParserException
-
+from .exceptions import ParserException
 from .schemes import NewRecipe
-from .loaders import FileLoader, RequestLoader, TextLoader
+from .loaders import FileLoader, RequestLoader, BrowserLoader, TextLoader
 
 
 class Parser(ABC):
@@ -16,7 +15,9 @@ class Parser(ABC):
     def __init__(
         self,
         url: str,
-        loader: type[FileLoader] | type[RequestLoader] | type[TextLoader] = RequestLoader,
+        loader: (
+            type[FileLoader] | type[RequestLoader] | type[TextLoader] | type[BrowserLoader]
+        ) = RequestLoader,
     ):
         self.url = url
         self.loader = loader
@@ -37,7 +38,7 @@ class ParserFactory:
         if "bbcgoodfood.com" in source:
             return BbcgoodfoodParser(source)
         if "k-ruoka.fi" in source:
-            return KruokaParser(source)
+            return KruokaParser(source, BrowserLoader)
         raise ValueError(f"{source} is not supported")
 
 
@@ -189,7 +190,6 @@ class KruokaParser(Parser):
         json_data = soup.find("script", {"id": "recipe-json-ld"})
         if not json_data:
             raise ParserException("'script#id=\"recipe-json-ld\"' element not found")
-
         parsed_data = json.loads(json_data.text)
         return NewRecipe(
             name=parsed_data["name"],
