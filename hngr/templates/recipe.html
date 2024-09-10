@@ -7,12 +7,17 @@
     <div class="recipe-content-item-2">
       <h1>{{ recipe.name }}</h1>
       {% if recipe.description %}
+      <div class="spacer-1"></div>
       <p>{{ recipe.description }}</p>
       {% endif %} {% if recipe.source %}
-      <p>Originally from: <a href="{{ recipe.source }}">{{ recipe.source_label }}</a></p>
+      <div class="spacer-1"></div>
+      <p>Originally from <a href="{{ recipe.source }}">{{ recipe.source_label }}</a></p>
+      <div class="spacer-1"></div>
       {% endif %}
       {% if recipe.image %}
+      <div class="spacer-1"></div>
         <img src="{{ recipe.image }}" alt="Preview {{ recipe.name }}" width="100%"/>
+      <div class="spacer-1"></div>
       {% endif %}
     </div>
   </header>
@@ -20,6 +25,7 @@
   <div class="recipe-content">
     <section class="recipe-content-item-1">
       <h2>Ingredients</h2>
+      <div class="spacer-1">
       <ul>
         {% for ingredient in recipe.ingredients.split('\n') %}
         <li>{{ ingredient }}</li>
@@ -29,6 +35,7 @@
 
     <section class="recipe-content-item-2">
       <h2>Directions</h2>
+      <div class="spacer-1">
       <ol>
         {% for step in recipe.directions.split('\n') %}
         <li>{{ step }}</li>

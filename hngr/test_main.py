@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from playwright.sync_api import Page, expect
 
 from .main import app
 
@@ -6,9 +7,10 @@ from .main import app
 client = TestClient(app)
 
 
-def test_index_loads():
-    response = client.get("/")
-    assert response.status_code == 200
+def test_index_loads(page: Page):
+    page.goto(f"{client.base_url}/")
+    expect(page).to_have_title("hngr")
+    expect(page.get_by_role("heading", name="Welcome to hngr", level=1)).to_be_visible()
 
 
 def test_scrape():

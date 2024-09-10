@@ -1,19 +1,24 @@
 {% extends "base.html" %} {% block content %}
 
 <h1>Welcome to hngr</h1>
+<div class="spacer-2"></div>
 <form hx-post="/scrape" hx-target="#result" hx-on="htmx:responseError:swapError"
   hx-indicator="#scraping-indicator">
   <label for="recipe-link">Paste link to scrape (supported: delish.com,
     bbcgoodfood.com)</label><br/>
+  <div class="spacer-1"></div>
   <input type="url" name="link" id="recipe-link" required placeholder="Recipe url"/><br/>
   <div class="spacer-1"></div>
   <button type="submit" class="btn">Scrape and save</button><span class="htmx-indicator" id="scraping-indicator">Scraping</span>
 </form>
 <div id="result" role="alert"></div>
+<div class="spacer-4"></div>
 <section>
   <h2>Your recipes</h2>
+  <div class="spacer-1"></div>
   <input type="text" name="term" hx-post="/search" hx-trigger="keyup changed delay:300ms" hx-target="#recipes"
   placeholder="Search recipes" />
+  <div class="spacer-2"></div>
   {% include "partials/recipes_list.html" %}
 </section>
 {% endblock %}
