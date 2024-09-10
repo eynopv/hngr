@@ -1,0 +1,3 @@
+[submodule "hngr/static/base-css"]
+	path = hngr/static/base-css
+	url = https://github.com/eynopv/base-css.git
