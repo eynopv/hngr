@@ -16,7 +16,8 @@
 <section>
   <h2>Your recipes</h2>
   <div class="spacer-1"></div>
-  <input type="text" name="term" hx-post="/search" hx-trigger="keyup changed delay:300ms" hx-target="#recipes"
+  <input type="text" name="term" hx-post="/search" hx-trigger="keyup changed delay:300ms"
+  hx-target="#recipes" hx-swap="outerHTML"
   placeholder="Search recipes" />
   <div class="spacer-2"></div>
   {% include "partials/recipes_list.html" %}
