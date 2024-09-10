@@ -2,9 +2,14 @@
   --white: #fefefe;
   --black: #030303;
   --grey: #1f1f1f;
+  --clr-success: green;
+  --clr-error: red;
+  --clr-warning: yellow;
+  --clr-light-grey: rgb(133, 133, 133);
 }
 
 body {
+  font-family: "Montserrat", sans-serif;
   font-size: 18px;
 }
 
