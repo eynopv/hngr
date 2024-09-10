@@ -81,3 +81,12 @@ input[name="term"] {
   width: 100%;
   max-width: 350px;
 }
+
+.htmx-indicator {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
+}
+
+.htmx-request .htmx-indicator {
+  opacity: 1;
+}
