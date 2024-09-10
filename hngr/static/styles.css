@@ -85,6 +85,11 @@ input[name="term"] {
   max-width: 350px;
 }
 
+img {
+  object-fit: cover;
+  object-position: center;
+}
+
 .recipe-content {
   display: flex;
   flex-wrap: wrap;
