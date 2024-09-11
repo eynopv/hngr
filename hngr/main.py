@@ -2,7 +2,7 @@ import os
 import logging
 from typing import Annotated, Optional
 from fastapi import FastAPI, Form, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -24,13 +24,16 @@ load_dotenv()
 if os.environ.get("DEV", False):
     logging.basicConfig(level=logging.INFO)
 
+DIRECTORY_STATIC = "hngr/static"
+DIRECTORY_TEMPLATES = "hngr/templates"
+DATABASE_URL = os.environ.get("DB", "")
+
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="hngr/static"), name="static")
 
-templates = Jinja2Templates(directory="hngr/templates")
+app.mount("/static", StaticFiles(directory=DIRECTORY_STATIC), name="static")
 
-DATABASE_URL = os.environ.get("DB", "")
+templates = Jinja2Templates(directory=DIRECTORY_TEMPLATES)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -47,6 +50,12 @@ async def index(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         connection.close()
+
+
+@app.get("/service-worker.js")
+async def service_worker():
+    headers = {"Cache-Control": "no-cache"}
+    return FileResponse(f"{DIRECTORY_STATIC}/service-worker.js", headers=headers)
 
 
 @app.post("/scrape")

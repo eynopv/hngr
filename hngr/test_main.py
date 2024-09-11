@@ -13,6 +13,11 @@ def test_index_loads(page: Page):
     expect(page.get_by_role("heading", name="Welcome to hngr", level=1)).to_be_visible()
 
 
+def test_service_worker_loads():
+    response = client.get("/service-worker.js")
+    assert response.status_code == 200
+
+
 def test_scrape():
     response = client.post("/scrape", data={"link": "mock"}, follow_redirects=False)
     assert response.status_code == 303
