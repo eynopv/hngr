@@ -1,2 +1,6 @@
+[project]
+requires-python = ">=3.10"
+name = "hngr"
+
 [tool.black]
 line-length=100

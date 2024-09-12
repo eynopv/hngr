@@ -1,13 +1,34 @@
-VENV_BIN=./.venv/bin
+VENV="./.venv"
+VENV_BIN=$(VENV)/bin
 TEST_DB_FILE=db/test.db
+PIP_COMPILE=$(VENV_BIN)/pip-compile
+PIP_INSTALL=$(VENV_BIN)/pip install
 
-.PHONY: venv
+.PHONY: setup
+.PHONY: install-dbmate
+.PHONY: compile
+.PHONY: test
 .PHONY: dev
 .PHONY: start
-.PHONY: test
+.PHONY: clean
 
-venv:
+setup:
 	python -m venv .venv
+	$(PIP_INSTALL) -r requirements-dev.txt
+	$(PIP_INSTALL) -r requirements.txt
+
+install-dbmate:
+	sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+	sudo chmod +x /usr/local/bin/dbmate
+
+compile:
+	$(PIP_COMPILE) requirements.in
+	$(PIP_COMPILE) requirements-dev.in
+
+test:
+	DATABASE_URL="sqlite:$(TEST_DB_FILE)" dbmate up
+	DB=$(TEST_DB_FILE) $(VENV_BIN)/pytest -vv || true
+	rm $(TEST_DB_FILE)
 
 dev:
 	DEV=true $(VENV_BIN)/fastapi dev hngr/main.py
@@ -15,11 +36,5 @@ dev:
 start:
 	$(VENV_BIN)/fastapi run hngr/main.py
 
-test:
-	DATABASE_URL="sqlite:$(TEST_DB_FILE)" dbmate up
-	DB=$(TEST_DB_FILE) $(VENV_BIN)/pytest -vv || true
-	rm $(TEST_DB_FILE)
-
-install-dbmate:
-	sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
-	sudo chmod +x /usr/local/bin/dbmate
+clean:
+	rm -rf $(VENV)
