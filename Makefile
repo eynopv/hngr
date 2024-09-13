@@ -5,7 +5,7 @@ PIP_COMPILE=$(VENV_BIN)/pip-compile
 PIP_INSTALL=$(VENV_BIN)/pip install
 
 .PHONY: setup
-.PHONY: install-dbmate
+.PHONY: setup-dbmate
 .PHONY: compile
 .PHONY: test
 .PHONY: dev
@@ -17,13 +17,13 @@ setup:
 	$(PIP_INSTALL) -r requirements-dev.txt
 	$(PIP_INSTALL) -r requirements.txt
 
-install-dbmate:
+setup-dbmate:
 	sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
 	sudo chmod +x /usr/local/bin/dbmate
 
 compile:
-	$(PIP_COMPILE) requirements.in
-	$(PIP_COMPILE) requirements-dev.in
+	$(PIP_COMPILE) --strip-extras requirements.in
+	$(PIP_COMPILE) --strip-extras requirements-dev.in
 
 test:
 	DATABASE_URL="sqlite:$(TEST_DB_FILE)" dbmate up
