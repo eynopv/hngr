@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/static/base-css/reset.css" />
     <link rel="stylesheet" href="/static/styles.css" />
     <script src="/static/script.js" defer></script>
+    {% block head %}{% endblock %}
   </head>
   <body>
     <div class="container p-2 mx-auto">{% block content %}{% endblock %}</div>

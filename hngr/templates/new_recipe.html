@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "partials/back_link.html" %}
+<div class="spacer-2"></div>
+<h1>New recipe</h1>
+<div class="spacer-4"></div>
+
+<form hx-post="/scrape" hx-target="#result" hx-on="htmx:responseError:swapError" hx-indicator=".btn"
+  hx-trigger="changed">
+  <label for="recipe-link">Paste link and we'll try to prefill your recipe</label>
+  <input type="url" name="link" id="recipe-link" required placeholder="Recipe url" hx-post="/scrape"
+  hx-trigger="change"/>
+  <div id="result" role="alert"></div>
+</form>
+
+<div class="spacer-1"></div>
+
+or <a href="/new-recipe/edit">enter details manually</a>
+{% endblock %}

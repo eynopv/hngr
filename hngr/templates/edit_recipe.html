@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="spacer-2"></div>
+<h1>Edit recipe</h1>
+<div class="spacer-4"></div>
+
+<form hx-post hx-target="#result" hx-on="htmx:responseError:swapError" hx-indicator=".btn">
+  <label for="recipe-name">Name*</label>
+  <input type="text" name="name" required id="recipe-name" value="{{ recipe.name if recipe else ''}}" />
+
+  <div class="spacer-1"></div>
+
+  <label for="recipe-description">Description</label>
+  <textarea name="description" rows="3" id="recipe-description">{% if recipe
+    %}{{recipe.description}}{% endif %}</textarea>
+
+  <div class="spacer-1"></div>
+
+  <label for="recipe-ingredients">Ingredients*</label>
+  <textarea name="ingredients" rows="10" required id="recipe-ingredients">{% if recipe
+    %}{{recipe.ingredients}}{% endif %}</textarea>
+
+  <div class="spacer-1"></div>
+
+  <label for="recipe-directions">Directions*</label>
+  <textarea name="directions" rows="10" required id="recipe-directions">{% if recipe
+    %}{{recipe.directions}}{% endif %}</textarea>
+
+  <div class="spacer-1"></div>
+
+  <button type="submit" class="btn">Save</button>
+  <!--
+  <button type="button" class="btn">Cancel</button>
+  -->
+  <div id="result"></div>
+</form>
+{% endblock %}

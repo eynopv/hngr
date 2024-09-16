@@ -1,17 +1,79 @@
+/* table of contents
+ *
+ * 1. global styles
+ *    :root,
+ *    html,
+ *    body
+ *
+ * 2. typography
+ *    h1 ... h6,
+ *    p,
+ *    a,
+ *    span
+ *
+ * 3. layouts
+ *    .center
+ *
+ * 4. components
+ *    4.1 buttons
+ *    4.2 inputs
+ *    4.3 images
+ *    4.4 recipes
+ *    ...
+ *
+ * component style layout:
+ * 1. display
+ *    - display
+ *    - flex
+ *    - flex-direction
+ *    - grid-column-gap
+ *    - grid-template-columns
+ * 2. positioning
+ *    - position
+ *    - left
+ *    - right
+ *    - top
+ *    - bottom
+ *    - z-index
+ * 3. box-model
+ *    - width
+ *    - height
+ *    - padding
+ *    - margin
+ *    - border
+ *    - background
+ * 4. typogprahy
+ *    - font
+ *    - font-family
+ *    - font-size
+ *    - color
+ * 5. manipulations
+ *    - transform
+ *    - filter
+ *    - opacity
+ * 6. misc
+ *    - border-radius
+ *    - box-shadow
+ */
+
+/* 1. global styles */
 :root {
-  --white: #fefefe;
-  --black: #030303;
-  --grey: #1f1f1f;
   --clr-success: green;
   --clr-error: red;
   --clr-warning: yellow;
   --clr-light-grey: rgb(133, 133, 133);
+
+  --spacing: 10px;
+
+  --icon-loader: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"%3E%3Ccircle fill="none" stroke="white" stroke-width="4" stroke-dasharray="78.54, 78.54" cx="25" cy="25" r="22" transform="rotate(52.1887 25 25)"%3E%3CanimateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 25 25;360 25 25" keyTimes="0;1"%3E%3C/animateTransform%3E%3C/circle%3E%3C/svg%3E');
 }
 
 body {
   font-family: "Montserrat", sans-serif;
   font-size: 18px;
 }
+
+/* 2. typography */
 
 h1 {
   font-size: 3.81rem;
@@ -21,53 +83,105 @@ h2 {
   font-size: 1.953rem;
 }
 
-.container {
-  max-width: 1000px;
-}
+/* 3. layouts */
 
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
 }
 
+.container {
+  max-width: 1000px;
+}
+
+.hidden {
+  display: none;
+}
+
+.p-1 {
+  padding: calc(var(--spacing) * 1);
+}
+
 .p-2 {
-  padding: 20px;
+  padding: calc(var(--spacing) * 2);
 }
 
 .spacer-1 {
-  margin: 10px 0;
+  margin: calc(var(--spacing) * 1) 0;
 }
 
 .spacer-2 {
-  margin: 20px 0;
+  margin: calc(var(--spacing) * 2) 0;
 }
 
 .spacer-3 {
-  margin: 30px 0;
+  margin: calc(var(--spacing) * 3) 0;
 }
 
 .spacer-4 {
-  margin: 40px 0;
+  margin: calc(var(--spacing) * 4) 0;
 }
 
-.htmx-indicator {
-  opacity: 0;
-  transition: opacity 300ms ease-in;
-}
+/* 4. components */
 
-.htmx-request .htmx-indicator {
-  opacity: 1;
-}
+/* 4.1 buttons */
 
 .btn {
+  position: relative;
   padding: 0.5em 1em;
-  border-style: solid;
-  border-width: 2px;
+  transition: padding 0.2s;
 }
 
 .btn:hover {
   cursor: pointer;
 }
+
+.btn::before {
+  display: inline-block;
+
+  position: absolute;
+  left: 1em;
+  top: 50%;
+
+  width: 1em;
+  height: 1em;
+  background-image: var(--icon-loader);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  transform: translateY(-50%);
+  transition: opacity 0.2s;
+  opacity: 0;
+
+  content: "";
+}
+
+.btn.htmx-request {
+  padding-left: 3em;
+}
+
+.btn.htmx-request::before {
+  opacity: 1;
+}
+
+/* 4.2 inputs */
+
+input,
+textarea {
+  display: block;
+  width: min(700px, 100%);
+  padding: 0.5em 1em;
+}
+
+/* 4.3 images */
+
+img {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* 4.4 recipes */
 
 #recipes {
   list-style: none;
@@ -76,18 +190,6 @@ h2 {
 #recipes li {
   margin-top: 0.3em;
   margin-bottom: 0.3em;
-}
-
-input[name="link"],
-input[name="term"] {
-  padding: 0.5em 1em;
-  width: 100%;
-  max-width: 350px;
-}
-
-img {
-  object-fit: cover;
-  object-position: center;
 }
 
 .recipe-content {

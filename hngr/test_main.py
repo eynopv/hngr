@@ -28,7 +28,7 @@ def test_scrape_invalidsource():
 
 
 def test_recipe_loads():
-    response = client.get("/recipe/1")
+    response = client.get("/recipe/101")
     assert response.status_code == 200
 
 
@@ -38,7 +38,7 @@ def test_recipe_delete_non_existant():
 
 
 def test_recipe_delete():
-    response = client.delete("/recipe/1")
+    response = client.delete("/recipe/100")
     assert response.status_code == 204
 
 
@@ -46,3 +46,41 @@ def test_search():
     response = client.post("/search", data={"term": "test"})
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type")
+
+
+def test_new_recipe_loads():
+    response = client.get("/new-recipe")
+    assert response.status_code == 200
+
+
+def test_new_recipe_edit_loads():
+    response = client.get("/new-recipe/edit")
+    assert response.status_code == 200
+
+
+def test_new_recipe_create():
+    response = client.post(
+        "/new-recipe/edit",
+        data={
+            "name": "Test name",
+            "description": "Test description",
+            "directions": "Test directions",
+            "ingredients": "Test ingredients",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+
+def test_new_recipe_create_with_empty_description():
+    response = client.post(
+        "/new-recipe/edit",
+        data={
+            "name": "Test name",
+            "description": "",
+            "directions": "Test directions",
+            "ingredients": "Test ingredients",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303

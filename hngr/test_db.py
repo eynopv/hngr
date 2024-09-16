@@ -8,6 +8,7 @@ from .db import (
     retrieve_recipe,
     delete_recipe,
     search_recipes,
+    update_recipe,
 )
 from .schemes import NewRecipe
 from .exceptions import DatabaseConnectionClosed
@@ -38,7 +39,7 @@ def test_retrieve_recipe_raises_exception_when_connection_not_open():
         retrieve_recipe(connection, 999)
 
 
-def test_create_recipe():
+def test_recipe_crud():
     connection = Connection(db_url)
     connection.open()
 
@@ -62,6 +63,25 @@ def test_create_recipe():
     assert recipe.directions == "Test Instructions"
     assert recipe.ingredients == "Test ingredients"
     assert recipe.source == "sourcepath"
+
+    recipe.name = "Updated name"
+    recipe.description = "Updated description"
+    recipe.directions = "Updated directions"
+    recipe.ingredients = "Updated ingredients"
+    update_recipe(connection, recipe)
+
+    recipe = retrieve_recipe(connection, new_recipe_id)
+    assert recipe
+    assert recipe.name == "Updated name"
+    assert recipe.description == "Updated description"
+    assert recipe.directions == "Updated directions"
+    assert recipe.ingredients == "Updated ingredients"
+    assert recipe.source == "sourcepath"
+
+    is_deleted = delete_recipe(connection, new_recipe_id)
+    assert is_deleted == True
+    recipe = retrieve_recipe(connection, new_recipe_id)
+    assert not recipe
 
     connection.close()
 
@@ -103,7 +123,7 @@ def test_create_recipe_raises_exception_when_connection_not_open():
         retrieve_recipe(connection, 999)
 
 
-def test_list_recipes():
+def test_list_recipes(populate_db):
     connection = Connection(db_url)
     connection.open()
 
@@ -140,40 +160,40 @@ def test_delete_recipe_failure():
     assert is_deleted == False
 
 
-def test_search_recipe_uppercase():
+def test_search_recipe_uppercase(populate_db):
     connection = Connection(db_url)
     connection.open()
-    items = search_recipes(connection, "Test")
+    items = search_recipes(connection, "Search")
     connection.close()
     assert len(items) == 1
-    assert items[0].name == "Test Recipe"
+    assert items[0].name == "Search recipe"
 
 
-def test_search_recipe_lowercase():
+def test_search_recipe_lowercase(populate_db):
     connection = Connection(db_url)
     connection.open()
-    items = search_recipes(connection, "test")
-    connection.close()
-    assert len(items) == 1
-    assert len(items) == 1
-    assert items[0].name == "Test Recipe"
-
-
-def test_search_recipe_end():
-    connection = Connection(db_url)
-    connection.open()
-    items = search_recipes(connection, "rec")
+    items = search_recipes(connection, "search")
     connection.close()
     assert len(items) == 1
     assert len(items) == 1
-    assert items[0].name == "Test Recipe"
+    assert items[0].name == "Search recipe"
 
 
-def test_search_recipe_multiple_terms():
+def test_search_recipe_end(populate_db):
     connection = Connection(db_url)
     connection.open()
-    items = search_recipes(connection, "test re")
+    items = search_recipes(connection, "earch")
     connection.close()
     assert len(items) == 1
     assert len(items) == 1
-    assert items[0].name == "Test Recipe"
+    assert items[0].name == "Search recipe"
+
+
+def test_search_recipe_multiple_terms(populate_db):
+    connection = Connection(db_url)
+    connection.open()
+    items = search_recipes(connection, "search re")
+    connection.close()
+    assert len(items) == 1
+    assert len(items) == 1
+    assert items[0].name == "Search recipe"

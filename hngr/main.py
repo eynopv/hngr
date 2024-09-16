@@ -7,6 +7,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
+from hngr.schemes import NewRecipe, Recipe
+
 from .parsers import ParserFactory, clean_url
 from .db import (
     Connection,
@@ -15,6 +17,7 @@ from .db import (
     retrieve_recipe,
     delete_recipe,
     search_recipes,
+    update_recipe,
 )
 from .exceptions import ParserException
 
@@ -68,7 +71,7 @@ def scrape(request: Request, response: Response, link: Annotated[str, Form()]):
         if new_recipe:
             connection.open()
             recipe_id = create_recipe(connection, new_recipe)
-            recipe_url = f"/recipe/{recipe_id}"
+            recipe_url = f"/recipe/{recipe_id}/edit"
             if "hx-request" in request.headers:
                 response.headers["HX-Redirect"] = recipe_url
                 response.status_code = 303
@@ -88,8 +91,58 @@ def scrape(request: Request, response: Response, link: Annotated[str, Form()]):
         connection.close()
 
 
+@app.get("/new-recipe", response_class=HTMLResponse)
+async def new_recipe_page(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="new_recipe.html", context={"is_new": True}
+    )
+
+
+@app.get("/new-recipe/edit", response_class=HTMLResponse)
+async def new_recipe_edit_page(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="edit_recipe.html", context={"is_new": True}
+    )
+
+
+@app.post("/new-recipe/edit")
+async def new_recipe_create(
+    request: Request,
+    response: Response,
+    name: Annotated[str, Form()],
+    description: Annotated[str, Form()],
+    directions: Annotated[str, Form()],
+    ingredients: Annotated[str, Form()],
+):
+    connection = Connection(url=DATABASE_URL)
+    try:
+        new_recipe = NewRecipe(
+            name=name,
+            description=description,
+            directions=directions,
+            ingredients=ingredients,
+            source="",
+            image="",
+        )
+        connection.open()
+        recipe_id = create_recipe(connection, new_recipe)
+        recipe_url = f"/recipe/{recipe_id}"
+        if "hx-request" in request.headers:
+            response.headers["HX-Redirect"] = recipe_url
+            response.status_code = 303
+            return response
+        return RedirectResponse(url=recipe_url, status_code=303)
+    except Exception as e:
+        logging.error(e)
+        return HTMLResponse(
+            content=f"<div class='error'>Internal server error: {str(e)}</div>", status_code=500
+        )
+    finally:
+        connection.close()
+
+
 @app.get("/recipe/{recipe_id}", response_class=HTMLResponse)
-async def recipe(request: Request, recipe_id: int):
+async def recipe_page(request: Request, recipe_id: int):
     connection = Connection(url=DATABASE_URL)
     try:
         connection.open()
@@ -120,6 +173,64 @@ async def recipe_delete(recipe_id: int):
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        connection.close()
+
+
+@app.get("/recipe/{recipe_id}/edit")
+async def edit_recipe_page(request: Request, recipe_id: int):
+    connection = Connection(url=DATABASE_URL)
+    try:
+        connection.open()
+        recipe = retrieve_recipe(connection, recipe_id)
+        if not recipe:
+            raise HTTPException(status_code=404, detail=f"recipe {recipe_id} not found")
+        return templates.TemplateResponse(
+            request=request, name="edit_recipe.html", context={"recipe": recipe}
+        )
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        connection.close()
+
+
+@app.post("/recipe/{recipe_id}/edit")
+async def edit_recipe(
+    request: Request,
+    response: Response,
+    recipe_id: int,
+    name: Annotated[str, Form()],
+    description: Annotated[str, Form()],
+    directions: Annotated[str, Form()],
+    ingredients: Annotated[str, Form()],
+):
+    connection = Connection(url=DATABASE_URL)
+    try:
+        connection.open()
+
+        recipe = retrieve_recipe(connection, recipe_id)
+        if not recipe:
+            raise HTTPException(status_code=404, detail=f"recipe {recipe_id} not found")
+
+        recipe.name = name
+        recipe.description = description
+        recipe.directions = directions
+        recipe.ingredients = ingredients
+
+        update_recipe(connection, recipe)
+
+        recipe_url = f"/recipe/{recipe_id}"
+        if "hx-request" in request.headers:
+            response.headers["HX-Redirect"] = recipe_url
+            response.status_code = 303
+            return response
+        return RedirectResponse(url=recipe_url, status_code=303)
+    except Exception as e:
+        logging.error(e)
+        return HTMLResponse(
+            content=f"<div class='error'>Internal server error: {str(e)}</div>", status_code=500
+        )
     finally:
         connection.close()
 

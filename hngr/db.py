@@ -30,10 +30,11 @@ def create_recipe(connection: Connection, new_recipe: NewRecipe):
 
     cursor = connection.connection.cursor()
 
-    cursor.execute("SELECT id FROM recipes WHERE source = ?", [new_recipe.source])
-    recipe = cursor.fetchone()
-    if recipe:
-        raise ValueError(f"recipe with source {new_recipe.source} already exists")
+    if new_recipe.source:
+        cursor.execute("SELECT id FROM recipes WHERE source = ?", [new_recipe.source])
+        recipe = cursor.fetchone()
+        if recipe:
+            raise ValueError(f"recipe with source {new_recipe.source} already exists")
 
     cursor.execute(
         """
@@ -99,6 +100,31 @@ def retrieve_recipe(connection: Connection, recipe_id: int) -> Recipe | None:
     )
 
 
+def update_recipe(connection: Connection, recipe: Recipe) -> Recipe:
+    logging.info(f"about to update recipe {recipe.id}")
+
+    if not connection.connection:
+        raise DatabaseConnectionClosed()
+
+    cursor = connection.connection.cursor()
+    cursor.execute(
+        """
+        UPDATE
+            recipes
+        SET
+            name = :name,
+            description = :description,
+            directions = :directions,
+            ingredients = :ingredients
+        WHERE
+            id = :id
+        """,
+        recipe.__dict__,
+    )
+    connection.connection.commit()
+    return recipe
+
+
 def delete_recipe(connection: Connection, recipe_id: int) -> int:
     logging.info(f"about to delete recipe {recipe_id}")
     if not connection.connection:
@@ -114,7 +140,7 @@ def delete_recipe(connection: Connection, recipe_id: int) -> int:
         [recipe_id],
     )
     connection.connection.commit()
-    return cursor.rowcount
+    return cursor.rowcount > 0
 
 
 def search_recipes(connection: Connection, term: str) -> List[RecipeListItem]:
