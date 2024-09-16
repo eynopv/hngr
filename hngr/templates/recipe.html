@@ -5,7 +5,10 @@
   <header class="recipe-content">
     <div class="recipe-content-item-1"></div>
     <div class="recipe-content-item-2">
-      <h1>{{ recipe.name }}</h1>
+      <a href="/recipe/{{ recipe.id }}/edit">Edit recipe</a>
+      <heading>
+        <h1>{{ recipe.name }}</h1>
+      </heading>
       {% if recipe.description %}
       <div class="spacer-1"></div>
       <p>{{ recipe.description }}</p>

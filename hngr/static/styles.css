@@ -195,7 +195,8 @@ img {
 .recipe-content {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: row;
+  column-gap: calc(var(--spacing) * 4);
 }
 
 .recipe-content-item-1 {
