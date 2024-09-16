@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
-from hngr.schemes import NewRecipe, Recipe
+from hngr.schemes import NewRecipe
 
 from .parsers import ParserFactory, clean_url
 from .db import (
@@ -249,5 +249,16 @@ async def search(request: Request, term: Annotated[Optional[str], Form()] = None
             name="partials/recipes_list.html",
             context={"recipes": recipes, "search": True},
         )
+    finally:
+        connection.close()
+
+
+@app.get("/api/recipes", status_code=200)
+async def api_list_recipes():
+    connection = Connection(url=DATABASE_URL)
+    try:
+        connection.open()
+        recipes = list_recipes(connection)
+        return {"data": recipes}
     finally:
         connection.close()

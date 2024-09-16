@@ -4,7 +4,7 @@ let isOnline = "onLine" in navigator ? navigator.onLine : true;
 let swRegistration;
 let sw;
 
-if (false) {
+if (true) {
   registerServiceWorker();
 }
 setupHtmx();

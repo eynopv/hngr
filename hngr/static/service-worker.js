@@ -1,6 +1,6 @@
 "use strict";
 
-const version = 7;
+const version = 8;
 const cacheName = `hngr-v${version}`;
 let isOnline = true;
 
@@ -22,6 +22,7 @@ async function main() {
   console.log(`Service worker (${version}) is starting`);
   await sendMessage({ requestStatusUpdate: true });
   await cacheFiles({});
+  cacheRecipes({});
 }
 
 async function onInstall() {
@@ -34,6 +35,7 @@ async function onActivate(event) {
     (async () => {
       await clearCaches();
       await cacheFiles({ forceReload: true });
+      cacheRecipes({ forceReload: true });
       await clients.claim();
       console.log(`Service worker (${version}) is activated`);
     })(),
@@ -44,6 +46,9 @@ function onMessage({ data }) {
   console.log("Received message", data);
   if (data.statusUpdate) {
     isOnline = data.statusUpdate.isOnline;
+    if (isOnline) {
+      cacheRecipes({});
+    }
     console.log(
       `Service worker (${version}) statusUpdate, isOnline: ${isOnline}`,
     );
@@ -147,6 +152,47 @@ async function cacheFiles({ forceReload = false }) {
         }
       } catch (error) {
         console.error(`Failed to cache ${url} file: ${error}`);
+      }
+    }),
+  );
+}
+
+async function cacheRecipes({ forceReload = false }) {
+  const cache = await caches.open(cacheName);
+
+  const response = await fetch("/api/recipes", {
+    method: "GET",
+    cache: "no-cache",
+  });
+
+  if (!response.ok) {
+    return;
+  }
+
+  const { data } = await response.json();
+
+  return Promise.all(
+    data.map(async ({ id }) => {
+      const recipeUrl = `/recipe/${id}`;
+      try {
+        let response;
+        if (!forceReload) {
+          response = await cache.match(recipeUrl);
+          if (response) {
+            return response;
+          }
+        }
+
+        response = await fetch(recipeUrl, {
+          method: "GET",
+          cache: "no-cache",
+        });
+
+        if (response.ok) {
+          await cache.put(recipeUrl, response.clone());
+        }
+      } catch (error) {
+        console.error(`Failed to cache ${recipeUrl} recipe: ${error}`);
       }
     }),
   );

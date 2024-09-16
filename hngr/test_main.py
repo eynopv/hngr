@@ -84,3 +84,11 @@ def test_new_recipe_create_with_empty_description():
         follow_redirects=False,
     )
     assert response.status_code == 303
+
+
+def test_api_list_recipes():
+    response = client.get("/api/recipes")
+    assert response.status_code == 200
+    recipes = response.json()
+    assert "data" in recipes
+    assert len(recipes["data"]) > 0
