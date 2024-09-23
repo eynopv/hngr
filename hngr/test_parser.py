@@ -8,6 +8,7 @@ from .parsers import (
     BbcgoodfoodParser,
     MockParser,
     DelishParser,
+    SchemaParser,
     remove_whitespace,
     clean_url,
 )
@@ -35,9 +36,9 @@ def test_factory_kruoka():
     assert type(parser) == KruokaParser
 
 
-def test_factory_invalidsource():
-    with pytest.raises(ValueError, match="invalidsource.com is not supported"):
-        ParserFactory.get_parser("invalidsource.com")
+def test_factory_default_parser():
+    parser = ParserFactory.get_parser("shouldwecheckforurlhere")
+    assert type(parser) == SchemaParser
 
 
 def test_delish():

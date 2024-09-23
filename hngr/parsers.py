@@ -39,7 +39,7 @@ class ParserFactory:
             return BbcgoodfoodParser(source)
         if "k-ruoka.fi" in source:
             return KruokaParser(source, BrowserLoader)
-        raise ValueError(f"{source} is not supported")
+        return SchemaParser(source, BrowserLoader)
 
 
 class MockParser(Parser):
@@ -199,6 +199,53 @@ class KruokaParser(Parser):
             source=self.url,
             image=parsed_data["image"][0],
         )
+
+
+class SchemaParser(Parser):
+
+    def parse(self):
+        try:
+            data = self.loader.load(self.url)
+            soup = BeautifulSoup(data, "html.parser")
+            scripts = soup.find_all("script", {"type": "application/ld+json"})
+            if not scripts:
+                raise Exception("script element not found")
+            parsed_data = self._find_recipe(scripts)
+            if not parsed_data:
+                raise Exception("no recipe found")
+            return NewRecipe(
+                name=parsed_data["name"],
+                description=parsed_data["description"],
+                directions="\n".join([i["text"] for i in parsed_data["recipeInstructions"]]),
+                ingredients="\n".join(parsed_data["recipeIngredient"]),
+                source=self.url,
+                image=parsed_data["image"][0],
+            )
+        except Exception as e:
+            print(e)
+            raise ParserException("Unable to parse, try manual creation")
+
+    def _find_recipe(self, scripts):
+        try:
+            for script in scripts:
+                json_data = self._try_parse_json(script)
+                if not json_data:
+                    continue
+                data = json_data if "@graph" not in json_data else json_data["@graph"]
+                for item in data:
+                    if item["@type"] == "Recipe":
+                        return item
+        except Exception as e:
+            print(self.url)
+            print("failed to find recipe: ", e)
+            return None
+
+    def _try_parse_json(self, script):
+        try:
+            loaded = json.loads(script.text)
+            return loaded
+        except Exception:
+            return None
 
 
 def remove_whitespace(s: str) -> str:
