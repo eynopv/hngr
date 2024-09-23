@@ -179,6 +179,7 @@ textarea {
 img {
   object-fit: cover;
   object-position: center;
+  max-width: 100%;
 }
 
 /* 4.4 recipes */
