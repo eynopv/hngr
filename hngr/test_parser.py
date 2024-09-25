@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from hngr.exceptions import ParserException
@@ -138,3 +139,47 @@ def test_cleanurl():
     assert clean_url("https://example.com/recipe") == "https://example.com/recipe"
     assert clean_url("https://example.com/recipe/") == "https://example.com/recipe/"
     assert clean_url("https://example.com/recipe?a=1&b=2") == "https://example.com/recipe"
+
+
+def test_schema_parser_with_graph():
+    data = {
+        "@graph": [
+            {
+                "@type": "Recipe",
+                "name": "Test Recipe",
+                "description": "Description",
+                "image": ["imageurl"],
+                "recipeInstructions": [{"text": "Instructions"}],
+                "recipeIngredient": ["Ingredients"],
+            }
+        ]
+    }
+    parser = SchemaParser(
+        url=f'<script type="application/ld+json">{json.dumps(data)}</script>', loader=TextLoader
+    )
+    recipe = parser.parse()
+    assert recipe.name == "Test Recipe"
+    assert recipe.description == "Description"
+    assert recipe.directions == "Instructions"
+    assert recipe.ingredients == "Ingredients"
+    assert recipe.image == "imageurl"
+
+
+def test_schema_parser_with_dictionary():
+    data = {
+        "@type": "Recipe",
+        "name": "Test Recipe",
+        "description": "Description",
+        "image": ["imageurl"],
+        "recipeInstructions": [{"text": "Instructions"}],
+        "recipeIngredient": ["Ingredients"],
+    }
+    parser = SchemaParser(
+        url=f'<script type="application/ld+json">{json.dumps(data)}</script>', loader=TextLoader
+    )
+    recipe = parser.parse()
+    assert recipe.name == "Test Recipe"
+    assert recipe.description == "Description"
+    assert recipe.directions == "Instructions"
+    assert recipe.ingredients == "Ingredients"
+    assert recipe.image == "imageurl"

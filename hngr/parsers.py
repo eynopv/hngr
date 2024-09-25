@@ -214,33 +214,62 @@ class SchemaParser(Parser):
             if not parsed_data:
                 raise Exception("no recipe found")
             return NewRecipe(
-                name=parsed_data["name"],
-                description=parsed_data["description"],
-                directions="\n".join([i["text"] for i in parsed_data["recipeInstructions"]]),
-                ingredients="\n".join(parsed_data["recipeIngredient"]),
+                name=parsed_data.get("name", ""),
+                description=parsed_data.get("description", ""),
+                directions="\n".join(
+                    [i.get("text", "") for i in parsed_data.get("recipeInstructions", [])]
+                ),
+                ingredients="\n".join(parsed_data.get("recipeIngredient", [])),
                 source=self.url,
-                image=parsed_data["image"][0],
+                image=self._get_image(parsed_data),
             )
         except Exception as e:
             print(e)
             raise ParserException("Unable to parse, try manual creation")
 
-    def _find_recipe(self, scripts):
+    def _get_image(self, data: dict) -> str:
+        if "image" in data:
+            if isinstance(data["image"], list):
+                return data["image"][0]
+            if isinstance(data["image"], str):
+                return data["image"]
+        return ""
+
+    def _find_recipe(self, scripts: List[Tag]):
         try:
             for script in scripts:
-                json_data = self._try_parse_json(script)
-                if not json_data:
-                    continue
-                data = json_data if "@graph" not in json_data else json_data["@graph"]
-                for item in data:
-                    if item["@type"] == "Recipe":
-                        return item
+                recipe = self._try_find_recipe_in_script(script)
+                print(recipe)
+                if recipe:
+                    return recipe
+            return None
         except Exception as e:
             print(self.url)
             print("failed to find recipe: ", e)
             return None
 
-    def _try_parse_json(self, script):
+    def _try_find_recipe_in_script(self, script: Tag) -> dict | None:
+        try:
+            json_data = self._try_parse_json(script)
+            if not json_data:
+                return None
+
+            data = json_data if "@graph" not in json_data else json_data["@graph"]
+
+            if isinstance(data, dict):
+                if data["@type"] == "Recipe":
+                    print("Found recipe")
+                    return data
+            elif isinstance(data, list):
+                for item in data:
+                    if item["@type"] == "Recipe":
+                        return item
+
+            return None
+        except:
+            return None
+
+    def _try_parse_json(self, script: Tag) -> dict | None:
         try:
             loaded = json.loads(script.text)
             return loaded
