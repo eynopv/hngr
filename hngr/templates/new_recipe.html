@@ -12,10 +12,11 @@
 <div class="spacer-4"></div>
 
 <form hx-post="/scrape" hx-target="#result" hx-on="htmx:responseError:swapError"
-  hx-indicator="#recipe-link">
+  hx-indicator=".btn">
   <label for="recipe-link">Paste link and we'll try to prefill your recipe</label>
   <div class="flex">
-    <input type="url" name="link" id="recipe-link" required placeholder="Recipe url"/><span></span>
+    <input type="url" name="link" id="recipe-link" required placeholder="Recipe url"/>
+    <button type="submit" class="btn">Continue</button>
   </div>
   <div id="result" role="alert"></div>
 </form>
