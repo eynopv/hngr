@@ -221,7 +221,7 @@ img {
 
 /* 4.4 recipes */
 
-#recipes {
+#recipes ul {
   list-style: none;
 }
 
